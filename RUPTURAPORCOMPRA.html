@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard de Compras e Exclusões</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
+    
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    h1 { margin: 0; font-size: 1.4em; color: #0f172a; }
+    
+    /* Filtros e Modos */
+    .controles { display: flex; gap: 10px; align-items: center; }
+    select, button { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600; cursor: pointer; }
+    button { background-color: #2563eb; color: #fff; border: none; }
+    button:hover { background-color: #1d4ed8; }
+
+    /* Cards Informativos */
+    .cards-resumo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+    .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 4px solid #2563eb; }
+    .card small { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75em; }
+    .card .valor { font-size: 1.5em; font-weight: bold; margin-top: 5px; color: #0f172a; }
+
+    /* Painel de Legenda das Cores */
+    .painel-legenda { background: #fff; border-radius: 10px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .painel-legenda h3 { margin: 0 0 10px 0; font-size: 0.95em; color: #334155; display: flex; align-items: center; gap: 6px; }
+    .grid-legenda { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .item-legenda-card { padding: 10px; border-radius: 6px; border-left: 4px solid transparent; font-size: 0.85em; background: #f8fafc; }
+    .item-legenda-card.verde { border-left-color: #16a34a; background: #f0fdf4; }
+    .item-legenda-card.amarelo { border-left-color: #ca8a04; background: #fefce8; }
+    .item-legenda-card.vermelho { border-left-color: #dc2626; background: #fef2f2; }
+    .item-legenda-card strong { display: block; margin-bottom: 3px; font-size: 0.95em; }
+    .item-legenda-card.verde strong { color: #16a34a; }
+    .item-legenda-card.amarelo strong { color: #ca8a04; }
+    .item-legenda-card.vermelho strong { color: #dc2626; }
+
+    /* Tabela */
+    .tabela-container { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background-color: #0f172a; color: #fff; padding: 12px 15px; font-size: 0.85em; text-transform: uppercase; }
+    td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9em; }
+    tr:hover { background-color: #f1f5f9; cursor: pointer; }
+
+    /* Badges na Tabela */
+    .badge-loja { font-weight: bold; color: #2563eb; }
+    .porcentagem { font-weight: bold; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+    .pct-alta { background-color: #fef2f2; color: #dc2626; }
+    .pct-media { background-color: #fefce8; color: #ca8a04; }
+    .pct-baixa { background-color: #f0fdf4; color: #16a34a; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>📊 Resumo por Loja e Exclusões</h1>
+    <div class="controles">
+      <label for="filtroData"><strong>Filtrar Data:</strong></label>
+      <select id="filtroData" onchange="atualizarView()">
+        <option value="GERAL"> GERAL CONSOLIDADO POR LOJA </option>
+        <option value="01/08/2026">01/08/2026</option>
+        <option value="02/08/2026">02/08/2026</option>
+        <option value="03/08/2026">03/08/2026</option>
+      </select>
+      <button onclick="resetarFiltros()">Ver Tudo</button>
+    </div>
+  </header>
+
+  <!-- CARDS SUPERIORES -->
+  <div class="cards-resumo">
+    <div class="card">
+      <small>Qtd Compras</small>
+      <div class="valor" id="cardQtdCompra">0</div>
+    </div>
+    <div class="card">
+      <small>Total de Itens</small>
+      <div class="valor" id="cardTotalItens">0</div>
+    </div>
+    <div class="card">
+      <small>Itens Excluídos</small>
+      <div class="valor" id="cardItensExcluidos">0</div>
+    </div>
+    <div class="card" style="border-left-color: #dc2626;">
+      <small>Exclusões % Geral</small>
+      <div class="valor" id="cardPctExcluidos">0%</div>
+    </div>
+  </div>
+
+  <!-- INFORMAÇÃO DA LEGENDA NO ESPAÇO SUPERIOR -->
+  <div class="painel-legenda">
+    <h3>ℹ️ Entenda as Cores da % de Exclusões</h3>
+    <div class="grid-legenda">
+      <div class="item-legenda-card verde">
+        <strong>🟢 Verde (Abaixo de 10%)</strong>
+        Desempenho Excelente / Aceitável. Volume baixo e saudável de itens excluídos.
+      </div>
+      <div class="item-legenda-card amarelo">
+        <strong>🟡 Amarelo (Entre 10% e 19,99%)</strong>
+        Atenção. Nível moderado de exclusões que vale a pena acompanhar.
+      </div>
+      <div class="item-legenda-card vermelho">
+        <strong>🔴 Vermelho (20% ou mais)</strong>
+        Alerta / Crítico. Taxa alta de cancelamento (ruptura, furo de estoque ou erro na separação).
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELA PRINCIPAL -->
+  <div class="tabela-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Data / Modo</th>
+          <th>Loja</th>
+          <th>Qtd Compra</th>
+          <th>Total de Itens</th>
+          <th>Itens Excluídos</th>
+          <th>Itens Excluídos %</th>
+        </tr>
+      </thead>
+      <tbody id="corpoTabela">
+        <!-- Preenchido via JavaScript -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const dadosBrutos = [
+    { data: "01/08/2026", loja: "WASHINGTON SOARES", qtdCompra: 12, totalItens: 608, excluidos: 63 },
+    { data: "01/08/2026", loja: "MONDUBIM", qtdCompra: 10, totalItens: 688, excluidos: 31 },
+    { data: "01/08/2026", loja: "ANTONIO SALES", qtdCompra: 14, totalItens: 707, excluidos: 81 },
+    { data: "01/08/2026", loja: "AQUIRAZ", qtdCompra: 9, totalItens: 380, excluidos: 47 },
+    { data: "01/08/2026", loja: "QUIXERAMOBIM", qtdCompra: 7, totalItens: 215, excluidos: 55 },
+    { data: "01/08/2026", loja: "MARANGUAPE", qtdCompra: 9, totalItens: 355, excluidos: 50 },
+    { data: "01/08/2026", loja: "PORTO DAS DUNAS", qtdCompra: 5, totalItens: 101, excluidos: 15 },
+    { data: "01/08/2026", loja: "TIANGUA", qtdCompra: 1, totalItens: 20, excluidos: 1 },
+    { data: "01/08/2026", loja: "CAMBEBA", qtdCompra: 1, totalItens: 43, excluidos: 7 },
+    { data: "01/08/2026", loja: "PREA", qtdCompra: 3, totalItens: 98, excluidos: 22 },
+    { data: "01/08/2026", loja: "SOBRAL", qtdCompra: 10, totalItens: 359, excluidos: 31 },
+    { data: "01/08/2026", loja: "ARACATI", qtdCompra: 1, totalItens: 118, excluidos: 6 },
+    { data: "01/08/2026", loja: "ACARAU", qtdCompra: 1, totalItens: 46, excluidos: 12 },
+    { data: "01/08/2026", loja: "LIMOEIRO", qtdCompra: 0, totalItens: 0, excluidos: 0 },
+    { data: "01/08/2026", loja: "QUIXADA", qtdCompra: 11, totalItens: 361, excluidos: 24 },
+    { data: "01/08/2026", loja: "ITAPIPOCA", qtdCompra: 10, totalItens: 268, excluidos: 69 },
+
+    { data: "02/08/2026", loja: "WASHINGTON SOARES", qtdCompra: 4, totalItens: 158, excluidos: 41 },
+    { data: "02/08/2026", loja: "MONDUBIM", qtdCompra: 5, totalItens: 249, excluidos: 10 },
+    { data: "02/08/2026", loja: "ANTONIO SALES", qtdCompra: 5, totalItens: 187, excluidos: 26 },
+    { data: "02/08/2026", loja: "AQUIRAZ", qtdCompra: 9, totalItens: 492, excluidos: 96 },
+    { data: "02/08/2026", loja: "QUIXERAMOBIM", qtdCompra: 0, totalItens: 0, excluidos: 0 },
+    { data: "02/08/2026", loja: "MARANGUAPE", qtdCompra: 3, totalItens: 65, excluidos: 4 },
+    { data: "02/08/2026", loja: "PORTO DAS DUNAS", qtdCompra: 2, totalItens: 96, excluidos: 9 },
+    { data: "02/08/2026", loja: "TIANGUA", qtdCompra: 1, totalItens: 47, excluidos: 6 },
+    { data: "02/08/2026", loja: "CAMBEBA", qtdCompra: 0, totalItens: 0, excluidos: 0 },
+    { data: "02/08/2026", loja: "PREA", qtdCompra: 3, totalItens: 157, excluidos: 5 },
+    { data: "02/08/2026", loja: "SOBRAL", qtdCompra: 5, totalItens: 223, excluidos: 19 },
+    { data: "02/08/2026", loja: "ARACATI", qtdCompra: 4, totalItens: 287, excluidos: 8 },
+    { data: "02/08/2026", loja: "ACARAU", qtdCompra: 3, totalItens: 179, excluidos: 37 },
+    { data: "02/08/2026", loja: "LIMOEIRO", qtdCompra: 3, totalItens: 280, excluidos: 27 },
+    { data: "02/08/2026", loja: "QUIXADA", qtdCompra: 8, totalItens: 340, excluidos: 20 },
+    { data: "02/08/2026", loja: "ITAPIPOCA", qtdCompra: 8, totalItens: 312, excluidos: 67 },
+
+    { data: "03/08/2026", loja: "WASHINGTON SOARES", qtdCompra: 6, totalItens: 184, excluidos: 41 },
+    { data: "03/08/2026", loja: "MONDUBIM", qtdCompra: 3, totalItens: 147, excluidos: 17 },
+    { data: "03/08/2026", loja: "ANTONIO SALES", qtdCompra: 14, totalItens: 531, excluidos: 62 },
+    { data: "03/08/2026", loja: "AQUIRAZ", qtdCompra: 2, totalItens: 36, excluidos: 2 },
+    { data: "03/08/2026", loja: "QUIXERAMOBIM", qtdCompra: 4, totalItens: 115, excluidos: 11 },
+    { data: "03/08/2026", loja: "MARANGUAPE", qtdCompra: 2, totalItens: 127, excluidos: 17 },
+    { data: "03/08/2026", loja: "PORTO DAS DUNAS", qtdCompra: 3, totalItens: 73, excluidos: 4 },
+    { data: "03/08/2026", loja: "TIANGUA", qtdCompra: 0, totalItens: 0, excluidos: 0 },
+    { data: "03/08/2026", loja: "CAMBEBA", qtdCompra: 0, totalItens: 0, excluidos: 0 },
+    { data: "03/08/2026", loja: "PREA", qtdCompra: 1, totalItens: 50, excluidos: 10 },
+    { data: "03/08/2026", loja: "SOBRAL", qtdCompra: 4, totalItens: 182, excluidos: 14 },
+    { data: "03/08/2026", loja: "ARACATI", qtdCompra: 6, totalItens: 296, excluidos: 28 },
+    { data: "03/08/2026", loja: "ACARAU", qtdCompra: 1, totalItens: 10, excluidos: 4 },
+    { data: "03/08/2026", loja: "LIMOEIRO", qtdCompra: 0, totalItens: 0, excluidos: 0 },
+    { data: "03/08/2026", loja: "QUIXADA", qtdCompra: 4, totalItens: 92, excluidos: 13 },
+    { data: "03/08/2026", loja: "ITAPIPOCA", qtdCompra: 5, totalItens: 113, excluidos: 26 }
+  ];
+
+  let lojaSelecionada = null;
+
+  function calcularGeralPorLoja() {
+    const mapa = {};
+    dadosBrutos.forEach(item => {
+      if (!mapa[item.loja]) {
+        mapa[item.loja] = { data: "GERAL", loja: item.loja, qtdCompra: 0, totalItens: 0, excluidos: 0 };
+      }
+      mapa[item.loja].qtdCompra += item.qtdCompra;
+      mapa[item.loja].totalItens += item.totalItens;
+      mapa[item.loja].excluidos += item.excluidos;
+    });
+    return Object.values(mapa);
+  }
+
+  function getClassePct(pct) {
+    if (pct >= 20) return 'pct-alta';
+    if (pct >= 10) return 'pct-media';
+    return 'pct-baixa';
+  }
+
+  function atualizarView() {
+    const filtroData = document.getElementById('filtroData').value;
+    let listaExibida = [];
+
+    if (lojaSelecionada) {
+      listaExibida = dadosBrutos.filter(d => d.loja === lojaSelecionada);
+    } else if (filtroData === "GERAL") {
+      listaExibida = calcularGeralPorLoja();
+    } else {
+      listaExibida = dadosBrutos.filter(d => d.data === filtroData);
+    }
+
+    renderizarTabela(listaExibida);
+  }
+
+  function renderizarTabela(lista) {
+    const tbody = document.getElementById('corpoTabela');
+    tbody.innerHTML = "";
+
+    let sumQtd = 0, sumTotal = 0, sumExcl = 0;
+
+    lista.forEach(item => {
+      sumQtd += item.qtdCompra;
+      sumTotal += item.totalItens;
+      sumExcl += item.excluidos;
+
+      const pct = item.totalItens > 0 ? ((item.excluidos / item.totalItens) * 100).toFixed(2) : "0.00";
+      const tr = document.createElement('tr');
+      
+      tr.onclick = () => {
+        lojaSelecionada = item.loja;
+        atualizarView();
+      };
+
+      tr.innerHTML = `
+        <td><strong>${item.data}</strong></td>
+        <td><span class="badge-loja">${item.loja}</span> ${lojaSelecionada ? '📌' : ''}</td>
+        <td>${item.qtdCompra}</td>
+        <td>${item.totalItens}</td>
+        <td>${item.excluidos}</td>
+        <td><span class="porcentagem ${getClassePct(pct)}">${pct}%</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('cardQtdCompra').innerText = sumQtd.toLocaleString('pt-BR');
+    document.getElementById('cardTotalItens').innerText = sumTotal.toLocaleString('pt-BR');
+    document.getElementById('cardItensExcluidos').innerText = sumExcl.toLocaleString('pt-BR');
+    const pctGeral = sumTotal > 0 ? ((sumExcl / sumTotal) * 100).toFixed(2) : "0.00";
+    document.getElementById('cardPctExcluidos').innerText = pctGeral + "%";
+  }
+
+  function resetarFiltros() {
+    lojaSelecionada = null;
+    document.getElementById('filtroData').value = "GERAL";
+    atualizarView();
+  }
+
+  atualizarView();
+</script>
+
+</body>
+</html>
