@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>RUPTURAS DA LOJA ONLINE</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    /* Cabeçalho com Logos */
+    header { 
+      display: flex; 
+      justify: space-between; 
+      align-items: center; 
+      margin-bottom: 20px; 
+      background: #fff; 
+      padding: 15px 25px; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .logo-container { display: flex; align-items: center; gap: 15px; }
+    .logo-main { height: 50px; object-fit: contain; }
+    .logo-app { height: 45px; object-fit: contain; }
+    h1 { margin: 0; font-size: 1.5rem; color: #0f172a; flex-grow: 1; text-align: center; }
+
+    /* Filtros */
+    .controles { display: flex; gap: 12px; align-items: center; justify-content: flex-end; margin-bottom: 20px; flex-wrap: wrap; }
+    select, button { padding: 10px 14px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600; cursor: pointer; }
+    button { background-color: #2563eb; color: #fff; border: none; }
+    button:hover { background-color: #1d4ed8; }
+
+    /* Cards e Tabela */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #2563eb; }
+    .card h3 { margin: 0 0 10px 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; }
+    .card .value { font-size: 1.8rem; font-weight: bold; color: #0f172a; }
+    
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background-color: #f1f5f9; font-weight: 600; color: #475569; }
+    tr:hover { background-color: #f8fafc; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <!-- Substitua "Logo-Pinheiro.png" e "app-icon.png" pelos nomes das imagens que subir no GitHub -->
+    <div class="logo-container">
+      <img src="Logo-Pinheiro.png" alt="Supermercado Pinheiro" class="logo-main" onerror="this.style.display='none'">
+    </div>
+    <h1>RUPTURAS DA LOJA ONLINE</h1>
+    <div class="logo-container">
+      <img src="app-icon.jpg" alt="App Pinheiro" class="logo-app" onerror="this.style.display='none'">
+    </div>
+  </header>
+
+  <div class="controles">
+    <label><strong>Filtros:</strong></label>
+    <select id="filtroMes" onchange="filtrarPorMes()">
+      <option value="TODOS">Todos os Meses</option>
+      <option value="2026-01">Janeiro / 2026</option>
+      <option value="2026-02">Fevereiro / 2026</option>
+      <option value="2026-03">Março / 2026</option>
+      <option value="2026-04">Abril / 2026</option>
+      <option value="2026-05">Maio / 2026</option>
+      <option value="2026-06">Junho / 2026</option>
+      <option value="2026-07">Julho / 2026</option>
+      <option value="2026-08" selected>Agosto / 2026</option>
+      <option value="2026-09">Setembro / 2026</option>
+      <option value="2026-10">Outubro / 2026</option>
+      <option value="2026-11">Novembro / 2026</option>
+      <option value="2026-12">Dezembro / 2026</option>
+    </select>
+
+    <select id="filtroData" onchange="atualizarView()">
+      <option value="GERAL">Visão Geral do Mês</option>
+    </select>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Qtd Compras</h3>
+      <div class="value" id="cardCompras">0</div>
+    </div>
+    <div class="card">
+      <h3>Total Itens</h3>
+      <div class="value" id="cardItens">0</div>
+    </div>
+    <div class="card" style="border-left-color: #ef4444;">
+      <h3>Excluídos / Rupturas</h3>
+      <div class="value" id="cardExcluidos">0</div>
+    </div>
+    <div class="card" style="border-left-color: #f59e0b;">
+      <h3>% Ruptura</h3>
+      <div class="value" id="cardTaxa">0%</div>
+    </div>
+  </div>
+
+  <table id="tabelaDados">
+    <thead>
+      <tr>
+        <th>Loja</th>
+        <th>Qtd Compra</th>
+        <th>Total Itens</th>
+        <th>Excluídos</th>
+        <th>% Ruptura</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Dados preenchidos dinamicamente -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Estrutura de dados pronta para receber novos lançamentos
+  let dadosBrutos = []; 
+
+  function filtrarPorMes() {
+    // Atualiza a lista de dias do filtro de data conforme o mês selecionado
+    atualizarView();
+  }
+
+  function atualizarView() {
+    // Lógica de cálculo dos cards e preenchimento da tabela
+  }
+</script>
+
+</body>
+</html>
