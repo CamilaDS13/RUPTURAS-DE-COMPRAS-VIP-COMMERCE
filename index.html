@@ -105,7 +105,6 @@
       </select>
     </div>
 
-    <!-- Significado das Cores da Ruptura -->
     <div class="legenda-cores">
       <span style="color: #64748b; font-weight: 500;">Status Ruptura:</span>
       <div class="legenda-item"><span class="dot dot-ok"></span> Até 10% (Ideal)</div>
@@ -152,13 +151,13 @@
 
 <script>
   const dados = [
-    // 01/08/2026
-    { mes: "2026-08", data: "2026-08-01", loja: "WASHINGTON SOARES", compras: 12, itens: 608, excluidos: 63 },
+    // 01/08/2026 (Atualizado)
+    { mes: "2026-08", data: "2026-08-01", loja: "WASHINGTON SOARES", compras: 14, itens: 665, excluidos: 76 },
     { mes: "2026-08", data: "2026-08-01", loja: "MONDUBIM", compras: 10, itens: 688, excluidos: 31 },
     { mes: "2026-08", data: "2026-08-01", loja: "ANTONIO SALES", compras: 14, itens: 707, excluidos: 81 },
     { mes: "2026-08", data: "2026-08-01", loja: "AQUIRAZ", compras: 9, itens: 380, excluidos: 47 },
-    { mes: "2026-08", data: "2026-08-01", loja: "QUIXERAMOBIM", compras: 7, itens: 215, excluidos: 55 },
-    { mes: "2026-08", data: "2026-08-01", loja: "MARANGUAPE", compras: 9, itens: 355, excluidos: 50 },
+    { mes: "2026-08", data: "2026-08-01", loja: "QUIXERAMOBIM", compras: 9, itens: 371, excluidos: 65 },
+    { mes: "2026-08", data: "2026-08-01", loja: "MARANGUAPE", compras: 10, itens: 377, excluidos: 57 },
     { mes: "2026-08", data: "2026-08-01", loja: "PORTO DAS DUNAS", compras: 5, itens: 101, excluidos: 15 },
     { mes: "2026-08", data: "2026-08-01", loja: "TIANGUA", compras: 1, itens: 20, excluidos: 1 },
     { mes: "2026-08", data: "2026-08-01", loja: "CAMBEBA", compras: 1, itens: 43, excluidos: 7 },
@@ -167,62 +166,62 @@
     { mes: "2026-08", data: "2026-08-01", loja: "ARACATI", compras: 1, itens: 118, excluidos: 6 },
     { mes: "2026-08", data: "2026-08-01", loja: "ACARAU", compras: 1, itens: 46, excluidos: 12 },
     { mes: "2026-08", data: "2026-08-01", loja: "LIMOEIRO", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-01", loja: "QUIXADA", compras: 11, itens: 361, excluidos: 24 },
+    { mes: "2026-08", data: "2026-08-01", loja: "QUIXADA", compras: 12, itens: 372, excluidos: 26 },
     { mes: "2026-08", data: "2026-08-01", loja: "ITAPIPOCA", compras: 10, itens: 268, excluidos: 69 },
 
-    // 02/08/2026
-    { mes: "2026-08", data: "2026-08-02", loja: "WASHINGTON SOARES", compras: 4, itens: 158, excluidos: 41 },
-    { mes: "2026-08", data: "2026-08-02", loja: "MONDUBIM", compras: 5, itens: 249, excluidos: 10 },
-    { mes: "2026-08", data: "2026-08-02", loja: "ANTONIO SALES", compras: 5, itens: 187, excluidos: 26 },
+    // 02/08/2026 (Atualizado)
+    { mes: "2026-08", data: "2026-08-02", loja: "WASHINGTON SOARES", compras: 5, itens: 160, excluidos: 41 },
+    { mes: "2026-08", data: "2026-08-02", loja: "MONDUBIM", compras: 6, itens: 314, excluidos: 19 },
+    { mes: "2026-08", data: "2026-08-02", loja: "ANTONIO SALES", compras: 7, itens: 227, excluidos: 26 },
     { mes: "2026-08", data: "2026-08-02", loja: "AQUIRAZ", compras: 9, itens: 492, excluidos: 96 },
-    { mes: "2026-08", data: "2026-08-02", loja: "QUIXERAMOBIM", compras: 0, itens: 0, excluidos: 0 },
+    { mes: "2026-08", data: "2026-08-02", loja: "QUIXERAMOBIM", compras: 2, itens: 66, excluidos: 16 },
     { mes: "2026-08", data: "2026-08-02", loja: "MARANGUAPE", compras: 3, itens: 65, excluidos: 4 },
     { mes: "2026-08", data: "2026-08-02", loja: "PORTO DAS DUNAS", compras: 2, itens: 96, excluidos: 9 },
     { mes: "2026-08", data: "2026-08-02", loja: "TIANGUA", compras: 1, itens: 47, excluidos: 6 },
     { mes: "2026-08", data: "2026-08-02", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-02", loja: "PREA", compras: 3, itens: 157, excluidos: 5 },
-    { mes: "2026-08", data: "2026-08-02", loja: "SOBRAL", compras: 5, itens: 223, excluidos: 19 },
-    { mes: "2026-08", data: "2026-08-02", loja: "ARACATI", compras: 4, itens: 287, excluidos: 8 },
+    { mes: "2026-08", data: "2026-08-02", loja: "PREA", compras: 4, itens: 381, excluidos: 53 },
+    { mes: "2026-08", data: "2026-08-02", loja: "SOBRAL", compras: 10, itens: 337, excluidos: 30 },
+    { mes: "2026-08", data: "2026-08-02", loja: "ARACATI", compras: 5, itens: 405, excluidos: 14 },
     { mes: "2026-08", data: "2026-08-02", loja: "ACARAU", compras: 3, itens: 179, excluidos: 37 },
     { mes: "2026-08", data: "2026-08-02", loja: "LIMOEIRO", compras: 3, itens: 280, excluidos: 27 },
     { mes: "2026-08", data: "2026-08-02", loja: "QUIXADA", compras: 8, itens: 340, excluidos: 20 },
     { mes: "2026-08", data: "2026-08-02", loja: "ITAPIPOCA", compras: 8, itens: 312, excluidos: 67 },
 
-    // 03/08/2026
-    { mes: "2026-08", data: "2026-08-03", loja: "WASHINGTON SOARES", compras: 6, itens: 184, excluidos: 41 },
-    { mes: "2026-08", data: "2026-08-03", loja: "MONDUBIM", compras: 3, itens: 147, excluidos: 17 },
-    { mes: "2026-08", data: "2026-08-03", loja: "ANTONIO SALES", compras: 14, itens: 531, excluidos: 62 },
-    { mes: "2026-08", data: "2026-08-03", loja: "AQUIRAZ", compras: 2, itens: 36, excluidos: 2 },
-    { mes: "2026-08", data: "2026-08-03", loja: "QUIXERAMOBIM", compras: 4, itens: 115, excluidos: 11 },
-    { mes: "2026-08", data: "2026-08-03", loja: "MARANGUAPE", compras: 2, itens: 127, excluidos: 17 },
+    // 03/08/2026 (Atualizado)
+    { mes: "2026-08", data: "2026-08-03", loja: "WASHINGTON SOARES", compras: 9, itens: 367, excluidos: 62 },
+    { mes: "2026-08", data: "2026-08-03", loja: "MONDUBIM", compras: 9, itens: 344, excluidos: 26 },
+    { mes: "2026-08", data: "2026-08-03", loja: "ANTONIO SALES", compras: 15, itens: 541, excluidos: 68 },
+    { mes: "2026-08", data: "2026-08-03", loja: "AQUIRAZ", compras: 4, itens: 116, excluidos: 16 },
+    { mes: "2026-08", data: "2026-08-03", loja: "QUIXERAMOBIM", compras: 6, itens: 125, excluidos: 12 },
+    { mes: "2026-08", data: "2026-08-03", loja: "MARANGUAPE", compras: 3, itens: 131, excluidos: 17 },
     { mes: "2026-08", data: "2026-08-03", loja: "PORTO DAS DUNAS", compras: 3, itens: 73, excluidos: 4 },
     { mes: "2026-08", data: "2026-08-03", loja: "TIANGUA", compras: 0, itens: 0, excluidos: 0 },
     { mes: "2026-08", data: "2026-08-03", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-03", loja: "PREA", compras: 1, itens: 50, excluidos: 10 },
-    { mes: "2026-08", data: "2026-08-03", loja: "SOBRAL", compras: 4, itens: 182, excluidos: 14 },
+    { mes: "2026-08", data: "2026-08-03", loja: "PREA", compras: 3, itens: 104, excluidos: 24 },
+    { mes: "2026-08", data: "2026-08-03", loja: "SOBRAL", compras: 9, itens: 535, excluidos: 43 },
     { mes: "2026-08", data: "2026-08-03", loja: "ARACATI", compras: 6, itens: 296, excluidos: 28 },
     { mes: "2026-08", data: "2026-08-03", loja: "ACARAU", compras: 1, itens: 10, excluidos: 4 },
     { mes: "2026-08", data: "2026-08-03", loja: "LIMOEIRO", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-03", loja: "QUIXADA", compras: 4, itens: 92, excluidos: 13 },
-    { mes: "2026-08", data: "2026-08-03", loja: "ITAPIPOCA", compras: 5, itens: 113, excluidos: 26 },
+    { mes: "2026-08", data: "2026-08-03", loja: "QUIXADA", compras: 7, itens: 247, excluidos: 31 },
+    { mes: "2026-08", data: "2026-08-03", loja: "ITAPIPOCA", compras: 8, itens: 293, excluidos: 66 },
 
-    // 04/08/2026
-    { mes: "2026-08", data: "2026-08-04", loja: "WASHINGTON SOARES", compras: 3, itens: 112, excluidos: 13 },
-    { mes: "2026-08", data: "2026-08-04", loja: "MONDUBIM", compras: 4, itens: 190, excluidos: 8 },
-    { mes: "2026-08", data: "2026-08-04", loja: "ANTONIO SALES", compras: 6, itens: 303, excluidos: 61 },
-    { mes: "2026-08", data: "2026-08-04", loja: "AQUIRAZ", compras: 1, itens: 17, excluidos: 2 },
-    { mes: "2026-08", data: "2026-08-04", loja: "QUIXERAMOBIM", compras: 2, itens: 79, excluidos: 1 },
-    { mes: "2026-08", data: "2026-08-04", loja: "MARANGUAPE", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-04", loja: "PORTO DAS DUNAS", compras: 1, itens: 2, excluidos: 0 },
+    // 04/08/2026 (Atualizado)
+    { mes: "2026-08", data: "2026-08-04", loja: "WASHINGTON SOARES", compras: 11, itens: 769, excluidos: 83 },
+    { mes: "2026-08", data: "2026-08-04", loja: "MONDUBIM", compras: 10, itens: 383, excluidos: 21 },
+    { mes: "2026-08", data: "2026-08-04", loja: "ANTONIO SALES", compras: 15, itens: 1054, excluidos: 167 },
+    { mes: "2026-08", data: "2026-08-04", loja: "AQUIRAZ", compras: 5, itens: 150, excluidos: 16 },
+    { mes: "2026-08", data: "2026-08-04", loja: "QUIXERAMOBIM", compras: 6, itens: 205, excluidos: 10 },
+    { mes: "2026-08", data: "2026-08-04", loja: "MARANGUAPE", compras: 3, itens: 105, excluidos: 26 },
+    { mes: "2026-08", data: "2026-08-04", loja: "PORTO DAS DUNAS", compras: 4, itens: 56, excluidos: 4 },
     { mes: "2026-08", data: "2026-08-04", loja: "TIANGUA", compras: 0, itens: 0, excluidos: 0 },
     { mes: "2026-08", data: "2026-08-04", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-04", loja: "PREA", compras: 4, itens: 79, excluidos: 13 },
-    { mes: "2026-08", data: "2026-08-04", loja: "SOBRAL", compras: 7, itens: 252, excluidos: 65 },
-    { mes: "2026-08", data: "2026-08-04", loja: "ARACATI", compras: 1, itens: 59, excluidos: 11 },
+    { mes: "2026-08", data: "2026-08-04", loja: "PREA", compras: 10, itens: 260, excluidos: 39 },
+    { mes: "2026-08", data: "2026-08-04", loja: "SOBRAL", compras: 9, itens: 367, excluidos: 71 },
+    { mes: "2026-08", data: "2026-08-04", loja: "ARACATI", compras: 2, itens: 96, excluidos: 13 },
     { mes: "2026-08", data: "2026-08-04", loja: "ACARAU", compras: 0, itens: 0, excluidos: 0 },
     { mes: "2026-08", data: "2026-08-04", loja: "LIMOEIRO", compras: 2, itens: 18, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-04", loja: "QUIXADA", compras: 5, itens: 122, excluidos: 18 },
-    { mes: "2026-08", data: "2026-08-04", loja: "ITAPIPOCA", compras: 3, itens: 55, excluidos: 9 }
+    { mes: "2026-08", data: "2026-08-04", loja: "QUIXADA", compras: 9, itens: 282, excluidos: 38 },
+    { mes: "2026-08", data: "2026-08-04", loja: "ITAPIPOCA", compras: 5, itens: 207, excluidos: 40 }
   ];
 
   function inicializarDatas() {
