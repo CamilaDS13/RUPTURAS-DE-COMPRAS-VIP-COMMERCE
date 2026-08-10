@@ -55,6 +55,23 @@
     }
     input[type="text"]:focus, select:focus { border-color: #2563eb; }
 
+    /* Botão Exportar Excel */
+    .btn-export {
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
+    }
+    .btn-export:hover { background-color: #15803d; }
+
     /* Legenda de Cores */
     .legenda-cores {
       display: flex;
@@ -110,7 +127,6 @@
     </div>
     <div class="header-info">
       <h1>RUPTURAS DA LOJA ONLINE</h1>
-      <!-- Campo de Data e Hora de Atualização -->
       <div class="last-update">Última atualização: <span id="dataAtualizacao">10/08/2026 às 15:00</span></div>
     </div>
     <div class="logo-box">
@@ -130,9 +146,11 @@
         <option value="GERAL">Visão Geral do Mês</option>
       </select>
 
-      <!-- Campo de Pesquisa por Loja -->
       <label for="buscaLoja">Loja:</label>
       <input type="text" id="buscaLoja" placeholder="Pesquisar loja..." oninput="filtrar()">
+
+      <!-- Botão Exportar -->
+      <button class="btn-export" onclick="exportarExcel()">📊 Exportar Excel</button>
     </div>
 
     <div class="legenda-cores">
@@ -310,7 +328,7 @@
 
   let listaExibida = [];
   let colunaOrdenacao = 'taxa';
-  let direcaoOrdenacao = 'desc'; // Padrão: maior taxa primeiro
+  let direcaoOrdenacao = 'desc';
 
   function inicializarDatas() {
     const mesSel = document.getElementById("filtroMes").value;
@@ -367,7 +385,6 @@
       totExcluidos += item.excluidos;
     });
 
-    // Atualiza os Cards
     document.getElementById("cardCompras").innerText = totCompras.toLocaleString("pt-BR");
     document.getElementById("cardItens").innerText = totItens.toLocaleString("pt-BR");
     document.getElementById("cardExcluidos").innerText = totExcluidos.toLocaleString("pt-BR");
@@ -375,13 +392,11 @@
     const taxaGeral = totItens > 0 ? ((totExcluidos / totItens) * 100).toFixed(2) : "0,00";
     document.getElementById("cardTaxa").innerText = taxaGeral.replace('.', ',') + "%";
 
-    // Converte objeto em lista
     listaExibida = Object.values(consolidado).map(item => {
       const taxaNum = item.itens > 0 ? (item.excluidos / item.itens) * 100 : 0;
       return { ...item, taxa: taxaNum };
     });
 
-    // Aplica busca por loja se houver
     if (termoBusca !== "") {
       listaExibida = listaExibida.filter(item => item.loja.toLowerCase().includes(termoBusca));
     }
@@ -400,7 +415,6 @@
   }
 
   function aplicarOrdenacaoERenderizar() {
-    // Atualiza ícones das colunas
     ['loja', 'compras', 'itens', 'excluidos', 'taxa'].forEach(col => {
       const el = document.getElementById(`sort-${col}`);
       if (col === colunaOrdenacao) {
@@ -412,7 +426,6 @@
       }
     });
 
-    // Ordena a lista
     listaExibida.sort((a, b) => {
       let valA = a[colunaOrdenacao];
       let valB = b[colunaOrdenacao];
@@ -423,7 +436,6 @@
       return direcaoOrdenacao === 'asc' ? valA - valB : valB - valA;
     });
 
-    // Renderiza a tabela
     const tbody = document.querySelector("#tabelaDados tbody");
     tbody.innerHTML = "";
 
@@ -441,6 +453,34 @@
       `;
       tbody.appendChild(tr);
     });
+  }
+
+  // Função para exportar os dados filtrados para CSV (compatível com Excel)
+  function exportarExcel() {
+    if (listaExibida.length === 0) {
+      alert("Não há dados para exportar com os filtros atuais.");
+      return;
+    }
+
+    const dataSel = document.getElementById("filtroData").value;
+    const nomeArquivo = dataSel === "GERAL" ? "Relatorio_Ruptura_Geral_Mes.csv" : `Relatorio_Ruptura_${dataSel}.csv`;
+
+    let csvContent = "\uFEFF"; // BOM para suporte a acentos no Excel
+    csvContent += "Loja;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
+
+    listaExibida.forEach(d => {
+      const taxaStr = d.taxa.toFixed(2).replace('.', ',');
+      csvContent += `"${d.loja}";${d.compras};${d.itens};${d.excluidos};"${taxaStr}%"\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", nomeArquivo);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   window.onload = inicializarDatas;
