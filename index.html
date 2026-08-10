@@ -19,11 +19,15 @@
       padding: 15px 25px; 
       border-radius: 12px; 
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      flex-wrap: wrap;
+      gap: 15px;
     }
     .logo-box { display: flex; align-items: center; gap: 10px; }
-    .logo-pinheiro { height: 55px; width: auto; object-fit: contain; }
-    .logo-app { height: 48px; width: auto; object-fit: contain; }
-    h1 { margin: 0; font-size: 1.4rem; color: #0f172a; text-align: center; flex-grow: 1; font-weight: 700; }
+    .logo-pinheiro { height: 50px; width: auto; object-fit: contain; }
+    .logo-app { height: 45px; width: auto; object-fit: contain; }
+    .header-info { text-align: center; flex-grow: 1; }
+    h1 { margin: 0; font-size: 1.3rem; color: #0f172a; font-weight: 700; }
+    .last-update { font-size: 0.8rem; color: #64748b; margin-top: 4px; font-weight: 500; }
 
     /* Filtros e Legendas */
     .controles-card {
@@ -39,8 +43,17 @@
       flex-wrap: wrap;
     }
     .filtros-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    label { font-size: 0.9rem; font-weight: 600; color: #475569; }
-    select { padding: 9px 14px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.9rem; background: #fff; font-weight: 500; cursor: pointer; outline: none; }
+    label { font-size: 0.88rem; font-weight: 600; color: #475569; }
+    select, input[type="text"] { 
+      padding: 8px 12px; 
+      border-radius: 6px; 
+      border: 1px solid #cbd5e1; 
+      font-size: 0.88rem; 
+      background: #fff; 
+      font-weight: 500; 
+      outline: none; 
+    }
+    input[type="text"]:focus, select:focus { border-color: #2563eb; }
 
     /* Legenda de Cores */
     .legenda-cores {
@@ -50,26 +63,35 @@
       background: #f1f5f9;
       padding: 8px 14px;
       border-radius: 8px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
     }
     .legenda-item { display: flex; align-items: center; gap: 6px; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     .dot-ok { background-color: #16a34a; }
     .dot-alerta { background-color: #ca8a04; }
     .dot-critico { background-color: #dc2626; }
 
     /* Cards */
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
     .card { background: #fff; padding: 18px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #2563eb; }
-    .card h3 { margin: 0 0 8px 0; font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-    .card .value { font-size: 1.7rem; font-weight: 700; color: #0f172a; }
+    .card h3 { margin: 0 0 8px 0; font-size: 0.78rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .value { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
     
     /* Tabela */
-    .table-container { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.92rem; }
-    th { background-color: #f8fafc; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+    .table-container { background: #fff; border-radius: 10px; overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+    th, td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+    th { 
+      background-color: #f8fafc; 
+      font-weight: 600; 
+      color: #475569; 
+      border-bottom: 2px solid #e2e8f0; 
+      cursor: pointer; 
+      user-select: none;
+    }
+    th:hover { background-color: #f1f5f9; }
+    th .sort-icon { font-size: 0.75rem; margin-left: 4px; color: #94a3b8; }
     tr:hover { background-color: #f8fafc; }
 
     /* Badges Dinâmicos por Cor */
@@ -86,7 +108,11 @@
     <div class="logo-box">
       <img class="logo-pinheiro" src="Logo-Pinheiro.png" alt="Supermercado Pinheiro">
     </div>
-    <h1>RUPTURAS DA LOJA ONLINE</h1>
+    <div class="header-info">
+      <h1>RUPTURAS DA LOJA ONLINE</h1>
+      <!-- Campo de Data e Hora de Atualização -->
+      <div class="last-update">Última atualização: <span id="dataAtualizacao">10/08/2026 às 15:00</span></div>
+    </div>
     <div class="logo-box">
       <img class="logo-app" src="1122e22e-4683-4a83-9834-445f503eef50.jpg" alt="App Pinheiro">
     </div>
@@ -103,13 +129,17 @@
       <select id="filtroData" onchange="filtrar()">
         <option value="GERAL">Visão Geral do Mês</option>
       </select>
+
+      <!-- Campo de Pesquisa por Loja -->
+      <label for="buscaLoja">Loja:</label>
+      <input type="text" id="buscaLoja" placeholder="Pesquisar loja..." oninput="filtrar()">
     </div>
 
     <div class="legenda-cores">
-      <span style="color: #64748b; font-weight: 500;">Status Ruptura:</span>
-      <div class="legenda-item"><span class="dot dot-ok"></span> Até 10% (Ideal)</div>
-      <div class="legenda-item"><span class="dot dot-alerta"></span> 10,01% a 20% (Atenção)</div>
-      <div class="legenda-item"><span class="dot dot-critico"></span> Acima de 20% (Crítico)</div>
+      <span style="color: #64748b; font-weight: 500;">Status:</span>
+      <div class="legenda-item"><span class="dot dot-ok"></span> Até 10%</div>
+      <div class="legenda-item"><span class="dot dot-alerta"></span> 10,01% a 20%</div>
+      <div class="legenda-item"><span class="dot dot-critico"></span> Acima de 20%</div>
     </div>
   </div>
 
@@ -136,11 +166,11 @@
     <table id="tabelaDados">
       <thead>
         <tr>
-          <th>Loja</th>
-          <th>Qtd Compra</th>
-          <th>Total Itens</th>
-          <th>Excluídos</th>
-          <th>% Ruptura</th>
+          <th onclick="ordenarPor('loja')">Loja <span class="sort-icon" id="sort-loja">↕</span></th>
+          <th onclick="ordenarPor('compras')">Qtd Compra <span class="sort-icon" id="sort-compras">↕</span></th>
+          <th onclick="ordenarPor('itens')">Total Itens <span class="sort-icon" id="sort-itens">↕</span></th>
+          <th onclick="ordenarPor('excluidos')">Excluídos <span class="sort-icon" id="sort-excluidos">↕</span></th>
+          <th onclick="ordenarPor('taxa')">% Ruptura <span class="sort-icon" id="sort-taxa">↕</span></th>
         </tr>
       </thead>
       <tbody>
@@ -278,6 +308,10 @@
     { mes: "2026-08", data: "2026-08-07", loja: "ITAPIPOCA", compras: 8, itens: 256, excluidos: 30 }
   ];
 
+  let listaExibida = [];
+  let colunaOrdenacao = 'taxa';
+  let direcaoOrdenacao = 'desc'; // Padrão: maior taxa primeiro
+
   function inicializarDatas() {
     const mesSel = document.getElementById("filtroMes").value;
     const selectData = document.getElementById("filtroData");
@@ -310,6 +344,7 @@
   function filtrar() {
     const mesSel = document.getElementById("filtroMes").value;
     const dataSel = document.getElementById("filtroData").value;
+    const termoBusca = document.getElementById("buscaLoja").value.toLowerCase().trim();
 
     let filtrados = dados.filter(d => d.mes === mesSel);
     if (dataSel !== "GERAL") {
@@ -321,7 +356,7 @@
 
     filtrados.forEach(item => {
       if (!consolidado[item.loja]) {
-        consolidado[item.loja] = { compras: 0, itens: 0, excluidos: 0 };
+        consolidado[item.loja] = { loja: item.loja, compras: 0, itens: 0, excluidos: 0 };
       }
       consolidado[item.loja].compras += item.compras;
       consolidado[item.loja].itens += item.itens;
@@ -332,6 +367,7 @@
       totExcluidos += item.excluidos;
     });
 
+    // Atualiza os Cards
     document.getElementById("cardCompras").innerText = totCompras.toLocaleString("pt-BR");
     document.getElementById("cardItens").innerText = totItens.toLocaleString("pt-BR");
     document.getElementById("cardExcluidos").innerText = totExcluidos.toLocaleString("pt-BR");
@@ -339,21 +375,69 @@
     const taxaGeral = totItens > 0 ? ((totExcluidos / totItens) * 100).toFixed(2) : "0,00";
     document.getElementById("cardTaxa").innerText = taxaGeral.replace('.', ',') + "%";
 
+    // Converte objeto em lista
+    listaExibida = Object.values(consolidado).map(item => {
+      const taxaNum = item.itens > 0 ? (item.excluidos / item.itens) * 100 : 0;
+      return { ...item, taxa: taxaNum };
+    });
+
+    // Aplica busca por loja se houver
+    if (termoBusca !== "") {
+      listaExibida = listaExibida.filter(item => item.loja.toLowerCase().includes(termoBusca));
+    }
+
+    aplicarOrdenacaoERenderizar();
+  }
+
+  function ordenarPor(coluna) {
+    if (colunaOrdenacao === coluna) {
+      direcaoOrdenacao = direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
+    } else {
+      colunaOrdenacao = coluna;
+      direcaoOrdenacao = coluna === 'loja' ? 'asc' : 'desc';
+    }
+    aplicarOrdenacaoERenderizar();
+  }
+
+  function aplicarOrdenacaoERenderizar() {
+    // Atualiza ícones das colunas
+    ['loja', 'compras', 'itens', 'excluidos', 'taxa'].forEach(col => {
+      const el = document.getElementById(`sort-${col}`);
+      if (col === colunaOrdenacao) {
+        el.innerText = direcaoOrdenacao === 'asc' ? '▲' : '▼';
+        el.style.color = '#2563eb';
+      } else {
+        el.innerText = '↕';
+        el.style.color = '#94a3b8';
+      }
+    });
+
+    // Ordena a lista
+    listaExibida.sort((a, b) => {
+      let valA = a[colunaOrdenacao];
+      let valB = b[colunaOrdenacao];
+
+      if (typeof valA === 'string') {
+        return direcaoOrdenacao === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      }
+      return direcaoOrdenacao === 'asc' ? valA - valB : valB - valA;
+    });
+
+    // Renderiza a tabela
     const tbody = document.querySelector("#tabelaDados tbody");
     tbody.innerHTML = "";
 
-    Object.keys(consolidado).forEach(loja => {
-      const d = consolidado[loja];
-      const taxa = d.itens > 0 ? ((d.excluidos / d.itens) * 100).toFixed(2) : "0,00";
-      const classeColor = obterClasseStatus(taxa);
+    listaExibida.forEach(d => {
+      const taxaStr = d.taxa.toFixed(2);
+      const classeColor = obterClasseStatus(taxaStr);
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><strong>${loja}</strong></td>
+        <td><strong>${d.loja}</strong></td>
         <td>${d.compras.toLocaleString("pt-BR")}</td>
         <td>${d.itens.toLocaleString("pt-BR")}</td>
         <td>${d.excluidos.toLocaleString("pt-BR")}</td>
-        <td><span class="badge-status ${classeColor}">${taxa.replace('.', ',')}%</span></td>
+        <td><span class="badge-status ${classeColor}">${taxaStr.replace('.', ',')}%</span></td>
       `;
       tbody.appendChild(tr);
     });
