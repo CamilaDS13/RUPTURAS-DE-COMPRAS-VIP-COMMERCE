@@ -96,7 +96,7 @@
     .card .value { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
     
     /* Tabela */
-    .table-container { background: #fff; border-radius: 10px; overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .table-container { background: #fff; border-radius: 10px; overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
     table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
     th, td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
     th { 
@@ -116,6 +116,24 @@
     .status-ok { color: #15803d; background: #f0fdf4; }
     .status-alerta { color: #a16207; background: #fefce8; }
     .status-critico { color: #b91c1c; background: #fef2f2; }
+
+    /* Bloco do Histórico Diário */
+    .secao-detalhamento {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-top: 20px;
+      display: none;
+    }
+    .secao-detalhamento h2 {
+      margin: 0 0 15px 0;
+      font-size: 1.05rem;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -149,7 +167,6 @@
       <label for="buscaLoja">Loja:</label>
       <input type="text" id="buscaLoja" placeholder="Pesquisar loja..." oninput="filtrar()">
 
-      <!-- Botão Exportar -->
       <button class="btn-export" onclick="exportarExcel()">📊 Exportar Excel</button>
     </div>
 
@@ -195,6 +212,27 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Bloco do Histórico Diário da Loja Selecionada -->
+  <div class="secao-detalhamento" id="blocoHistoricoLoja">
+    <h2>📅 Histórico Diário - <span id="nomeLojaHistorico" style="color: #2563eb;"></span></h2>
+    <div class="table-container" style="box-shadow: none; margin-bottom: 0;">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Qtd Compra</th>
+            <th>Total Itens</th>
+            <th>Excluídos</th>
+            <th>% Ruptura</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyHistoricoLoja">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -402,16 +440,7 @@
     }
 
     aplicarOrdenacaoERenderizar();
-  }
-
-  function ordenarPor(coluna) {
-    if (colunaOrdenacao === coluna) {
-      direcaoOrdenacao = direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
-    } else {
-      colunaOrdenacao = coluna;
-      direcaoOrdenacao = coluna === 'loja' ? 'asc' : 'desc';
-    }
-    aplicarOrdenacaoERenderizar();
+    atualizarHistoricoLoja(mesSel, dataSel, termoBusca);
   }
 
   function aplicarOrdenacaoERenderizar() {
@@ -455,26 +484,97 @@
     });
   }
 
-  // Função para exportar os dados filtrados para CSV (compatível com Excel)
+  function atualizarHistoricoLoja(mesSel, dataSel, termoBusca) {
+    const bloco = document.getElementById("blocoHistoricoLoja");
+    
+    if (dataSel === "GERAL" && termoBusca.length >= 3 && listaExibida.length === 1) {
+      const nomeLoja = listaExibida[0].loja;
+      document.getElementById("nomeLojaHistorico").innerText = nomeLoja;
+
+      const registrosLoja = dados.filter(d => d.mes === mesSel && d.loja === nomeLoja).sort((a,b) => a.data.localeCompare(b.data));
+
+      const tbody = document.getElementById("tbodyHistoricoLoja");
+      tbody.innerHTML = "";
+
+      registrosLoja.forEach(d => {
+        const parts = d.data.split('-');
+        const dataFormatada = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const taxaNum = d.itens > 0 ? (d.excluidos / d.itens) * 100 : 0;
+        const taxaStr = taxaNum.toFixed(2);
+        const classeColor = obterClasseStatus(taxaStr);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${dataFormatada}</strong></td>
+          <td>${d.compras.toLocaleString("pt-BR")}</td>
+          <td>${d.itens.toLocaleString("pt-BR")}</td>
+          <td>${d.excluidos.toLocaleString("pt-BR")}</td>
+          <td><span class="badge-status ${classeColor}">${taxaStr.replace('.', ',')}%</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      bloco.style.display = "block";
+    } else {
+      bloco.style.display = "none";
+    }
+  }
+
+  function ordenarPor(coluna) {
+    if (colunaOrdenacao === coluna) {
+      direcaoOrdenacao = direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
+    } else {
+      colunaOrdenacao = coluna;
+      direcaoOrdenacao = coluna === 'loja' ? 'asc' : 'desc';
+    }
+    aplicarOrdenacaoERenderizar();
+  }
+
   function exportarExcel() {
     if (listaExibida.length === 0) {
       alert("Não há dados para exportar com os filtros atuais.");
       return;
     }
 
+    const mesSel = document.getElementById("filtroMes").value;
     const dataSel = document.getElementById("filtroData").value;
+    const termoBusca = document.getElementById("buscaLoja").value.toLowerCase().trim();
     const nomeArquivo = dataSel === "GERAL" ? "Relatorio_Ruptura_Geral_Mes.csv" : `Relatorio_Ruptura_${dataSel}.csv`;
 
-    let csvContent = "\uFEFF"; // BOM para suporte a acentos no Excel
-    csvContent += "Loja;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
+    let csvContent = "\uFEFF"; 
 
-    listaExibida.forEach(d => {
-      const taxaStr = d.taxa.toFixed(2).replace('.', ',');
-      csvContent += `"${d.loja}";${d.compras};${d.itens};${d.excluidos};"${taxaStr}%"\n`;
-    });
+    if (dataSel === "GERAL" && termoBusca.length >= 3 && listaExibida.length === 1) {
+      const nomeLoja = listaExibida[0].loja;
+      
+      csvContent += `RESUMO DO MES - ${nomeLoja}\n`;
+      csvContent += "Loja;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
+      const resumo = listaExibida[0];
+      const taxaResumo = resumo.taxa.toFixed(2).replace('.', ',');
+      csvContent += `"${resumo.loja}";${resumo.compras};${resumo.itens};${resumo.excluidos};"${taxaResumo}%"\n\n`;
+
+      csvContent += `HISTORICO DIARIO - ${nomeLoja}\n`;
+      csvContent += "Data;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
+
+      const registrosLoja = dados.filter(d => d.mes === mesSel && d.loja === nomeLoja).sort((a,b) => a.data.localeCompare(b.data));
+
+      registrosLoja.forEach(d => {
+        const parts = d.data.split('-');
+        const dataFormatada = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const taxaNum = d.itens > 0 ? (d.excluidos / d.itens) * 100 : 0;
+        const taxaStr = taxaNum.toFixed(2).replace('.', ',');
+        csvContent += `"${dataFormatada}";${d.compras};${d.itens};${d.excluidos};"${taxaStr}%"\n`;
+      });
+
+    } else {
+      csvContent += "Loja;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
+      listaExibida.forEach(d => {
+        const taxaStr = d.taxa.toFixed(2).replace('.', ',');
+        csvContent += `"${d.loja}";${d.compras};${d.itens};${d.excluidos};"${taxaStr}%"\n`;
+      });
+    }
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
+    const link = document.append? document.createElement("a") : null;
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
     link.setAttribute("download", nomeArquivo);
