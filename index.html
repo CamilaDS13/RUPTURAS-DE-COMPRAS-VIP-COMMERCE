@@ -23,8 +23,6 @@
       gap: 15px;
     }
     .logo-box { display: flex; align-items: center; gap: 10px; }
-    .logo-pinheiro { height: 50px; width: auto; object-fit: contain; }
-    .logo-app { height: 45px; width: auto; object-fit: contain; }
     .header-info { text-align: center; flex-grow: 1; }
     h1 { margin: 0; font-size: 1.3rem; color: #0f172a; font-weight: 700; }
     .last-update { font-size: 0.8rem; color: #64748b; margin-top: 4px; font-weight: 500; }
@@ -140,15 +138,77 @@
 
 <div class="container">
   <header>
+    <!-- Desenho 3D Esquerda: Prateleira de Mercado e Lupa de Estoque -->
     <div class="logo-box">
-      <img class="logo-pinheiro" src="Logo-Pinheiro.png" alt="Supermercado Pinheiro">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="55" height="55">
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="gradOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#c2410c;stop-opacity:1" />
+          </linearGradient>
+          <filter id="shadow1" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.15"/>
+          </filter>
+        </defs>
+        <rect x="15" y="25" width="70" height="50" rx="8" fill="#e2e8f0" filter="url(#shadow1)" />
+        <rect x="12" y="45" width="76" height="6" rx="3" fill="#94a3b8" />
+        <rect x="12" y="68" width="76" height="6" rx="3" fill="#64748b" />
+        <rect x="22" y="28" width="12" height="17" rx="2" fill="url(#grad1)" />
+        <rect x="37" y="31" width="10" height="14" rx="2" fill="url(#gradOrange)" />
+        <rect x="52" y="29" width="8" height="16" rx="3" fill="#22c55e" />
+        <rect x="64" y="32" width="14" height="13" rx="2" fill="#eab308" />
+        <path d="M 20 53 L 30 53 L 38 64 L 70 64 L 75 53 L 80 53" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="42" cy="67" r="3" fill="#1e293b"/>
+        <circle cx="66" cy="67" r="3" fill="#1e293b"/>
+        <circle cx="68" cy="38" r="12" fill="none" stroke="#ef4444" stroke-width="3" filter="url(#shadow1)"/>
+        <circle cx="68" cy="38" r="9" fill="#22c55e" fill-opacity="0.2"/>
+        <line x1="77" y1="47" x2="86" y2="56" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 63 38 L 67 42 L 73 34" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
+
     <div class="header-info">
       <h1>RUPTURAS DA LOJA ONLINE</h1>
-      <div class="last-update">Última atualização: <span id="dataAtualizacao">10/08/2026 às 15:00</span></div>
+      <div class="last-update">Última atualização: <span id="dataAtualizacao">--/--/---- às --:--</span></div>
     </div>
+
+    <!-- Desenho 3D Direita: Smartphone com Checklist de E-commerce -->
     <div class="logo-box">
-      <img class="logo-app" src="1122e22e-4683-4a83-9834-445f503eef50.jpg" alt="App Pinheiro">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="55" height="55">
+        <defs>
+          <linearGradient id="gradPhone" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+          </linearGradient>
+          <filter id="shadow2" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.18"/>
+          </filter>
+        </defs>
+        <rect x="22" y="10" width="56" height="80" rx="10" fill="url(#gradPhone)" filter="url(#shadow2)" />
+        <rect x="26" y="18" width="48" height="64" rx="5" fill="#ffffff" />
+        <circle cx="50" cy="14" r="2" fill="#64748b" />
+        <rect x="28" y="21" width="44" height="8" rx="2" fill="#2563eb" />
+        <circle cx="34" cy="36" r="3.5" fill="#22c55e" />
+        <path d="M 32.5 36 L 33.5 37 L 35.5 35" fill="none" stroke="#ffffff" stroke-width="1.2" />
+        <rect x="40" y="34" width="28" height="4" rx="2" fill="#cbd5e1" />
+        <circle cx="34" cy="48" r="3.5" fill="#ef4444" />
+        <line x1="32.5" y1="46.5" x2="35.5" y2="49.5" stroke="#ffffff" stroke-width="1.2" />
+        <line x1="35.5" y1="46.5" x2="32.5" y2="49.5" stroke="#ffffff" stroke-width="1.2" />
+        <rect x="40" y="46" width="22" height="4" rx="2" fill="#fca5a5" />
+        <circle cx="34" cy="60" r="3.5" fill="#22c55e" />
+        <path d="M 32.5 60 L 33.5 61 L 35.5 59" fill="none" stroke="#ffffff" stroke-width="1.2" />
+        <rect x="40" y="58" width="26" height="4" rx="2" fill="#cbd5e1" />
+        <circle cx="34" cy="72" r="3.5" fill="#eab308" />
+        <rect x="40" y="70" width="20" height="4" rx="2" fill="#fde047" />
+        <path d="M 62 58 L 78 50 L 92 57 L 76 65 Z" fill="#f97316" />
+        <path d="M 62 58 L 76 65 L 76 80 L 62 73 Z" fill="#ea580c" />
+        <path d="M 76 65 L 92 57 L 92 72 L 76 80 Z" fill="#c2410c" />
+        <path d="M 69 61.5 L 85 53.5 L 85 56.5 L 69 64.5 Z" fill="#fde047" opacity="0.8"/>
+      </svg>
     </div>
   </header>
 
@@ -213,7 +273,7 @@
     </table>
   </div>
 
-  <!-- Bloco do Histórico Diário da Loja Selecionada -->
+  <!-- Bloco do Histórico Diário -->
   <div class="secao-detalhamento" id="blocoHistoricoLoja">
     <h2>📅 Histórico Diário - <span id="nomeLojaHistorico" style="color: #2563eb;"></span></h2>
     <div class="table-container" style="box-shadow: none; margin-bottom: 0;">
@@ -236,6 +296,18 @@
 </div>
 
 <script>
+  // Atualizar data e hora exatas da execução
+  function atualizarDataHoraHeader() {
+    const agora = new Date();
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const ano = agora.getFullYear();
+    const horas = String(agora.getHours()).padStart(2, '0');
+    const minutos = String(agora.getMinutes()).padStart(2, '0');
+
+    document.getElementById("dataAtualizacao").innerText = `${dia}/${mes}/${ano} às ${horas}:${minutos}`;
+  }
+
   const dados = [
     // 01/08/2026
     { mes: "2026-08", data: "2026-08-01", loja: "WASHINGTON SOARES", compras: 14, itens: 665, excluidos: 76 },
@@ -369,6 +441,7 @@
   let direcaoOrdenacao = 'desc';
 
   function inicializarDatas() {
+    atualizarDataHoraHeader();
     const mesSel = document.getElementById("filtroMes").value;
     const selectData = document.getElementById("filtroData");
     selectData.innerHTML = '<option value="GERAL">Visão Geral do Mês</option>';
@@ -574,7 +647,7 @@
     }
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.append? document.createElement("a") : null;
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
     link.setAttribute("download", nomeArquivo);
