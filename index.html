@@ -7,7 +7,7 @@
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
-    .container { max-width: 1200px; margin: 0 auto; }
+    .container { max-width: 1280px; margin: 0 auto; }
     
     /* Cabeçalho */
     header { 
@@ -87,16 +87,137 @@
     .dot-alerta { background-color: #ca8a04; }
     .dot-critico { background-color: #dc2626; }
 
-    /* Cards */
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-    .card { background: #fff; padding: 18px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #2563eb; }
-    .card h3 { margin: 0 0 8px 0; font-size: 0.78rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-    .card .value { font-size: 1.6rem; font-weight: 700; color: #0f172a; }
-    
-    /* Tabela */
-    .table-container { background: #fff; border-radius: 10px; overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+    /* GRID SUPERIOR: KPI Cards + Card Top 3 Críticas */
+    .top-section {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+      margin-bottom: 20px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 992px) {
+      .top-section { grid-template-columns: 1fr; }
+    }
+
+    /* Grid dos Cards KPIs */
+    .cards { 
+      display: grid; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 15px; 
+    }
+
+    @media (min-width: 600px) {
+      .cards { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .card { 
+      background: #fff; 
+      padding: 16px 18px; 
+      border-radius: 10px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+      border-left: 5px solid #2563eb; 
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .card h3 { margin: 0 0 6px 0; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .value { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
+
+    /* CARD TOP 3 CRÍTICAS */
+    .card-top3 {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      border: 1px solid #fee2e2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-top3-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #fecdd3;
+    }
+
+    .top3-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #991b1b;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .tooltip-wrapper { position: relative; cursor: pointer; }
+    .info-icon {
+      font-size: 10px;
+      color: #94a3b8;
+      border: 1px solid #cbd5e1;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .tooltip-wrapper .tooltip-text {
+      visibility: hidden;
+      width: 200px;
+      background-color: #0f172a;
+      color: #ffffff;
+      text-align: left;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 10px;
+      line-height: 1.3;
+      position: absolute;
+      z-index: 20;
+      top: 120%;
+      right: 0;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .tooltip-wrapper:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+    .top3-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .top3-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border-left: 3px solid transparent;
+    }
+
+    .top3-loja { font-size: 0.8rem; font-weight: 800; color: #0f172a; }
+    .top3-subtext { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+    .top3-subtext strong { color: #1e293b; font-weight: 700; }
+    .top3-badge { font-size: 0.88rem; font-weight: 800; }
+
+    .rank-1 { background-color: #ffeef0; border-left-color: #e11d48; }
+    .rank-1 .top3-badge { color: #9f1239; }
+
+    .rank-2 { background-color: #fff7ed; border-left-color: #f97316; }
+    .rank-2 .top3-badge { color: #9a3412; }
+
+    .rank-3 { background-color: #fefce8; border-left-color: #eab308; }
+    .rank-3 .top3-badge { color: #854d0e; }
+
+    /* Tabela Principal */
+    .table-container { background: #fff; border-radius: 10px; overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
     table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
-    th, td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+    th, td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
     th { 
       background-color: #f8fafc; 
       font-weight: 600; 
@@ -109,8 +230,8 @@
     th .sort-icon { font-size: 0.75rem; margin-left: 4px; color: #94a3b8; }
     tr:hover { background-color: #f8fafc; }
 
-    /* Badges Dinâmicos por Cor */
-    .badge-status { font-weight: 600; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+    /* Badges Dinâmicos */
+    .badge-status { font-weight: 600; padding: 3px 7px; border-radius: 4px; display: inline-block; font-size: 0.82rem; }
     .status-ok { color: #15803d; background: #f0fdf4; }
     .status-alerta { color: #a16207; background: #fefce8; }
     .status-critico { color: #b91c1c; background: #fef2f2; }
@@ -119,18 +240,23 @@
     .secao-detalhamento {
       background: #fff;
       border-radius: 10px;
-      padding: 20px;
+      padding: 15px 18px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      margin-top: 20px;
+      margin-top: 15px;
       display: none;
     }
     .secao-detalhamento h2 {
-      margin: 0 0 15px 0;
-      font-size: 1.05rem;
+      margin: 0 0 12px 0;
+      font-size: 0.95rem;
       color: #1e293b;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+    }
+    .secao-detalhamento table th, 
+    .secao-detalhamento table td {
+      padding: 8px 12px;
+      font-size: 0.83rem;
     }
   </style>
 </head>
@@ -138,9 +264,8 @@
 
 <div class="container">
   <header>
-    <!-- Desenho 3D Esquerda: Prateleira de Mercado e Lupa de Estoque -->
     <div class="logo-box">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="55" height="55">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
         <defs>
           <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
@@ -176,9 +301,8 @@
       <div class="last-update">Última atualização: <span id="dataAtualizacao">--/--/---- às --:--</span></div>
     </div>
 
-    <!-- Desenho 3D Direita: Smartphone com Checklist de E-commerce -->
     <div class="logo-box">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="55" height="55">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
         <defs>
           <linearGradient id="gradPhone" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
@@ -238,25 +362,51 @@
     </div>
   </div>
 
-  <div class="cards">
-    <div class="card">
-      <h3>Qtd Compras</h3>
-      <div class="value" id="cardCompras">0</div>
+  <!-- SEÇÃO SUPERIOR: CARDS KPI + CARD TOP 3 LOJAS CRÍTICAS -->
+  <div class="top-section">
+    
+    <div class="cards">
+      <div class="card">
+        <h3>Qtd Compras</h3>
+        <div class="value" id="cardCompras">0</div>
+      </div>
+      <div class="card">
+        <h3>Total Itens</h3>
+        <div class="value" id="cardItens">0</div>
+      </div>
+      <div class="card" style="border-left-color: #ef4444;">
+        <h3>Excluídos / Rupturas</h3>
+        <div class="value" id="cardExcluidos">0</div>
+      </div>
+      <div class="card" style="border-left-color: #f59e0b;">
+        <h3>% Ruptura Geral</h3>
+        <div class="value" id="cardTaxa">0,00%</div>
+      </div>
     </div>
-    <div class="card">
-      <h3>Total Itens</h3>
-      <div class="value" id="cardItens">0</div>
+
+    <!-- Card Top 3 Lojas Críticas -->
+    <div class="card-top3">
+      <div class="card-top3-header">
+        <div class="top3-title">
+          <span>🚨</span>
+          <span>TOP 3 LOJAS CRÍTICAS</span>
+        </div>
+        <div class="tooltip-wrapper">
+          <span class="info-icon">i</span>
+          <div class="tooltip-text">
+            O ranking considera a Taxa de Exclusão (% de itens excluídos sobre o total da loja).
+          </div>
+        </div>
+      </div>
+
+      <div class="top3-list" id="listaTop3">
+        <!-- Renderizado Dinamicamente -->
+      </div>
     </div>
-    <div class="card" style="border-left-color: #ef4444;">
-      <h3>Excluídos / Rupturas</h3>
-      <div class="value" id="cardExcluidos">0</div>
-    </div>
-    <div class="card" style="border-left-color: #f59e0b;">
-      <h3>% Ruptura Geral</h3>
-      <div class="value" id="cardTaxa">0,00%</div>
-    </div>
+
   </div>
 
+  <!-- Tabela Principal -->
   <div class="table-container">
     <table id="tabelaDados">
       <thead>
@@ -296,7 +446,6 @@
 </div>
 
 <script>
-  // Atualizar data e hora exatas da execução
   function atualizarDataHoraHeader() {
     const agora = new Date();
     const dia = String(agora.getDate()).padStart(2, '0');
@@ -437,6 +586,7 @@
   ];
 
   let listaExibida = [];
+  let listaCompletaConsolidada = [];
   let colunaOrdenacao = 'taxa';
   let direcaoOrdenacao = 'desc';
 
@@ -503,17 +653,48 @@
     const taxaGeral = totItens > 0 ? ((totExcluidos / totItens) * 100).toFixed(2) : "0,00";
     document.getElementById("cardTaxa").innerText = taxaGeral.replace('.', ',') + "%";
 
-    listaExibida = Object.values(consolidado).map(item => {
+    listaCompletaConsolidada = Object.values(consolidado).map(item => {
       const taxaNum = item.itens > 0 ? (item.excluidos / item.itens) * 100 : 0;
       return { ...item, taxa: taxaNum };
     });
+
+    listaExibida = [...listaCompletaConsolidada];
 
     if (termoBusca !== "") {
       listaExibida = listaExibida.filter(item => item.loja.toLowerCase().includes(termoBusca));
     }
 
     aplicarOrdenacaoERenderizar();
+    renderizarTop3();
     atualizarHistoricoLoja(mesSel, dataSel, termoBusca);
+  }
+
+  function renderizarTop3() {
+    const containerTop3 = document.getElementById("listaTop3");
+    containerTop3.innerHTML = "";
+
+    const top3 = [...listaCompletaConsolidada]
+      .filter(loja => loja.itens > 0)
+      .sort((a, b) => b.taxa - a.taxa)
+      .slice(0, 3);
+
+    const classesRank = ["rank-1", "rank-2", "rank-3"];
+
+    top3.forEach((item, index) => {
+      const taxaStr = item.taxa.toFixed(2).replace('.', ',');
+      const div = document.createElement("div");
+      div.className = `top3-item ${classesRank[index]}`;
+      div.innerHTML = `
+        <div>
+          <div class="top3-loja">${index + 1}º ${item.loja}</div>
+          <div class="top3-subtext">
+            <strong>${item.excluidos.toLocaleString("pt-BR")}</strong> excluídos de <strong>${item.itens.toLocaleString("pt-BR")}</strong> itens
+          </div>
+        </div>
+        <div class="top3-badge">${taxaStr}%</div>
+      `;
+      containerTop3.appendChild(div);
+    });
   }
 
   function aplicarOrdenacaoERenderizar() {
@@ -646,9 +827,9 @@
       });
     }
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
     link.setAttribute("href", url);
     link.setAttribute("download", nomeArquivo);
     document.body.appendChild(link);
