@@ -4,841 +4,568 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RUPTURAS DA LOJA ONLINE</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
-    .container { max-width: 1280px; margin: 0 auto; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
     
-    /* Cabeçalho */
-    header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 20px; 
-      background: #fff; 
-      padding: 15px 25px; 
-      border-radius: 12px; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-    .logo-box { display: flex; align-items: center; gap: 10px; }
-    .header-info { text-align: center; flex-grow: 1; }
-    h1 { margin: 0; font-size: 1.3rem; color: #0f172a; font-weight: 700; }
-    .last-update { font-size: 0.8rem; color: #64748b; margin-top: 4px; font-weight: 500; }
-
-    /* Filtros e Legendas */
-    .controles-card {
+    /* Header */
+    .header {
       background: #fff;
-      padding: 15px 20px;
-      border-radius: 10px;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       margin-bottom: 20px;
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-      flex-wrap: wrap;
+      position: relative;
     }
-    .filtros-group { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    label { font-size: 0.88rem; font-weight: 600; color: #475569; }
-    select, input[type="text"] { 
-      padding: 8px 12px; 
-      border-radius: 6px; 
-      border: 1px solid #cbd5e1; 
-      font-size: 0.88rem; 
-      background: #fff; 
-      font-weight: 500; 
-      outline: none; 
+    .header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: 0.5px;
     }
-    input[type="text"]:focus, select:focus { border-color: #2563eb; }
+    .header p {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
 
-    /* Botão Exportar Excel */
+    /* Controls & Filters */
+    .controls-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+    }
+    select, input[type="text"] {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      background-color: #fff;
+    }
     .btn-export {
-      background-color: #16a34a;
+      background-color: #10b981;
       color: white;
       border: none;
       padding: 8px 16px;
       border-radius: 6px;
-      font-size: 0.88rem;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: background-color 0.2s;
+      margin-left: auto;
     }
-    .btn-export:hover { background-color: #15803d; }
-
-    /* Legenda de Cores */
-    .legenda-cores {
+    .btn-export:hover {
+      background-color: #059669;
+    }
+    .status-legend {
       display: flex;
+      align-items: center;
       gap: 15px;
-      align-items: center;
-      background: #f1f5f9;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 0.82rem;
+      margin-top: 15px;
+      padding-top: 12px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 12px;
       font-weight: 600;
+      color: #475569;
     }
-    .legenda-item { display: flex; align-items: center; gap: 6px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot-ok { background-color: #16a34a; }
-    .dot-alerta { background-color: #ca8a04; }
-    .dot-critico { background-color: #dc2626; }
-
-    /* GRID SUPERIOR: KPI Cards + Card Top 3 Críticas */
-    .top-section {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 20px;
-      margin-bottom: 20px;
-      align-items: stretch;
-    }
-
-    @media (max-width: 992px) {
-      .top-section { grid-template-columns: 1fr; }
-    }
-
-    /* Grid dos Cards KPIs */
-    .cards { 
-      display: grid; 
-      grid-template-columns: repeat(2, 1fr); 
-      gap: 15px; 
-    }
-
-    @media (min-width: 600px) {
-      .cards { grid-template-columns: repeat(4, 1fr); }
-    }
-
-    .card { 
-      background: #fff; 
-      padding: 16px 18px; 
-      border-radius: 10px; 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-      border-left: 5px solid #2563eb; 
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .card h3 { margin: 0 0 6px 0; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-    .card .value { font-size: 1.5rem; font-weight: 700; color: #0f172a; }
-
-    /* CARD TOP 3 CRÍTICAS */
-    .card-top3 {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 14px 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      border: 1px solid #fee2e2;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .card-top3-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #fecdd3;
-    }
-
-    .top3-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #991b1b;
-      font-weight: 800;
-      font-size: 0.85rem;
-    }
-
-    .tooltip-wrapper { position: relative; cursor: pointer; }
-    .info-icon {
-      font-size: 10px;
-      color: #94a3b8;
-      border: 1px solid #cbd5e1;
+    .dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
+      display: inline-block;
+      margin-right: 4px;
     }
+    .dot-green { background-color: #10b981; }
+    .dot-orange { background-color: #f59e0b; }
+    .dot-red { background-color: #ef4444; }
 
-    .tooltip-wrapper .tooltip-text {
-      visibility: hidden;
-      width: 200px;
-      background-color: #0f172a;
-      color: #ffffff;
-      text-align: left;
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 10px;
-      line-height: 1.3;
-      position: absolute;
-      z-index: 20;
-      top: 120%;
-      right: 0;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    /* Dashboard Main Section */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) 300px;
+      gap: 15px;
+      margin-bottom: 25px;
     }
-
-    .tooltip-wrapper:hover .tooltip-text { visibility: visible; opacity: 1; }
-
-    .top3-list { display: flex; flex-direction: column; gap: 6px; }
-
-    .top3-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 6px 10px;
-      border-radius: 6px;
-      border-left: 3px solid transparent;
-    }
-
-    .top3-loja { font-size: 0.8rem; font-weight: 800; color: #0f172a; }
-    .top3-subtext { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
-    .top3-subtext strong { color: #1e293b; font-weight: 700; }
-    .top3-badge { font-size: 0.88rem; font-weight: 800; }
-
-    .rank-1 { background-color: #ffeef0; border-left-color: #e11d48; }
-    .rank-1 .top3-badge { color: #9f1239; }
-
-    .rank-2 { background-color: #fff7ed; border-left-color: #f97316; }
-    .rank-2 .top3-badge { color: #9a3412; }
-
-    .rank-3 { background-color: #fefce8; border-left-color: #eab308; }
-    .rank-3 .top3-badge { color: #854d0e; }
-
-    /* Tabela Principal */
-    .table-container { background: #fff; border-radius: 10px; overflow-x: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
-    th, td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
-    th { 
-      background-color: #f8fafc; 
-      font-weight: 600; 
-      color: #475569; 
-      border-bottom: 2px solid #e2e8f0; 
-      cursor: pointer; 
-      user-select: none;
-    }
-    th:hover { background-color: #f1f5f9; }
-    th .sort-icon { font-size: 0.75rem; margin-left: 4px; color: #94a3b8; }
-    tr:hover { background-color: #f8fafc; }
-
-    /* Badges Dinâmicos */
-    .badge-status { font-weight: 600; padding: 3px 7px; border-radius: 4px; display: inline-block; font-size: 0.82rem; }
-    .status-ok { color: #15803d; background: #f0fdf4; }
-    .status-alerta { color: #a16207; background: #fefce8; }
-    .status-critico { color: #b91c1c; background: #fef2f2; }
-
-    /* Bloco do Histórico Diário */
-    .secao-detalhamento {
+    .kpi-card {
       background: #fff;
       border-radius: 10px;
-      padding: 15px 18px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      margin-top: 15px;
-      display: none;
+      padding: 20px 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 4px solid #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
-    .secao-detalhamento h2 {
-      margin: 0 0 12px 0;
-      font-size: 0.95rem;
-      color: #1e293b;
+    .kpi-card.blue { border-left-color: #3b82f6; }
+    .kpi-card.red { border-left-color: #ef4444; }
+    .kpi-card.orange { border-left-color: #f59e0b; }
+    
+    .kpi-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 10px;
+    }
+
+    /* Top Critical Stores Card */
+    .critical-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .critical-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #991b1b;
+      text-transform: uppercase;
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-bottom: 12px;
     }
-    .secao-detalhamento table th, 
-    .secao-detalhamento table td {
-      padding: 8px 12px;
-      font-size: 0.83rem;
+    .critical-item {
+      background: #fef2f2;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+    .critical-item:last-child {
+      margin-bottom: 0;
+    }
+    .critical-store-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .critical-store-sub {
+      font-size: 10px;
+      color: #64748b;
+    }
+    .critical-store-pct {
+      font-size: 13px;
+      font-weight: 800;
+      color: #991b1b;
+    }
+
+    /* Table Section */
+    .table-container {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      background-color: #f8fafc;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      border-bottom: 1px solid #e2e8f0;
+      cursor: pointer;
+    }
+    td {
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    tr:hover {
+      background-color: #f8fafc;
+    }
+    .badge-pct {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 12px;
+      display: inline-block;
+    }
+    .bg-green { background-color: #d1fae5; color: #065f46; }
+    .bg-orange { background-color: #fef3c7; color: #92400e; }
+    .bg-red { background-color: #fee2e2; color: #991b1b; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <div class="logo-box">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
-        <defs>
-          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
-          </linearGradient>
-          <linearGradient id="gradOrange" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#c2410c;stop-opacity:1" />
-          </linearGradient>
-          <filter id="shadow1" x="-10%" y="-10%" width="120%" height="120%">
-            <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.15"/>
-          </filter>
-        </defs>
-        <rect x="15" y="25" width="70" height="50" rx="8" fill="#e2e8f0" filter="url(#shadow1)" />
-        <rect x="12" y="45" width="76" height="6" rx="3" fill="#94a3b8" />
-        <rect x="12" y="68" width="76" height="6" rx="3" fill="#64748b" />
-        <rect x="22" y="28" width="12" height="17" rx="2" fill="url(#grad1)" />
-        <rect x="37" y="31" width="10" height="14" rx="2" fill="url(#gradOrange)" />
-        <rect x="52" y="29" width="8" height="16" rx="3" fill="#22c55e" />
-        <rect x="64" y="32" width="14" height="13" rx="2" fill="#eab308" />
-        <path d="M 20 53 L 30 53 L 38 64 L 70 64 L 75 53 L 80 53" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="42" cy="67" r="3" fill="#1e293b"/>
-        <circle cx="66" cy="67" r="3" fill="#1e293b"/>
-        <circle cx="68" cy="38" r="12" fill="none" stroke="#ef4444" stroke-width="3" filter="url(#shadow1)"/>
-        <circle cx="68" cy="38" r="9" fill="#22c55e" fill-opacity="0.2"/>
-        <line x1="77" y1="47" x2="86" y2="56" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/>
-        <path d="M 63 38 L 67 42 L 73 34" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-
-    <div class="header-info">
+  <div class="container">
+    <div class="header">
       <h1>RUPTURAS DA LOJA ONLINE</h1>
-      <div class="last-update">Última atualização: <span id="dataAtualizacao">--/--/---- às --:--</span></div>
+      <p>Última atualização: <span id="lblAtualizacao">12/08/2026 às 13:56</span></p>
     </div>
 
-    <div class="logo-box">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
-        <defs>
-          <linearGradient id="gradPhone" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
-          </linearGradient>
-          <filter id="shadow2" x="-10%" y="-10%" width="120%" height="120%">
-            <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.18"/>
-          </filter>
-        </defs>
-        <rect x="22" y="10" width="56" height="80" rx="10" fill="url(#gradPhone)" filter="url(#shadow2)" />
-        <rect x="26" y="18" width="48" height="64" rx="5" fill="#ffffff" />
-        <circle cx="50" cy="14" r="2" fill="#64748b" />
-        <rect x="28" y="21" width="44" height="8" rx="2" fill="#2563eb" />
-        <circle cx="34" cy="36" r="3.5" fill="#22c55e" />
-        <path d="M 32.5 36 L 33.5 37 L 35.5 35" fill="none" stroke="#ffffff" stroke-width="1.2" />
-        <rect x="40" y="34" width="28" height="4" rx="2" fill="#cbd5e1" />
-        <circle cx="34" cy="48" r="3.5" fill="#ef4444" />
-        <line x1="32.5" y1="46.5" x2="35.5" y2="49.5" stroke="#ffffff" stroke-width="1.2" />
-        <line x1="35.5" y1="46.5" x2="32.5" y2="49.5" stroke="#ffffff" stroke-width="1.2" />
-        <rect x="40" y="46" width="22" height="4" rx="2" fill="#fca5a5" />
-        <circle cx="34" cy="60" r="3.5" fill="#22c55e" />
-        <path d="M 32.5 60 L 33.5 61 L 35.5 59" fill="none" stroke="#ffffff" stroke-width="1.2" />
-        <rect x="40" y="58" width="26" height="4" rx="2" fill="#cbd5e1" />
-        <circle cx="34" cy="72" r="3.5" fill="#eab308" />
-        <rect x="40" y="70" width="20" height="4" rx="2" fill="#fde047" />
-        <path d="M 62 58 L 78 50 L 92 57 L 76 65 Z" fill="#f97316" />
-        <path d="M 62 58 L 76 65 L 76 80 L 62 73 Z" fill="#ea580c" />
-        <path d="M 76 65 L 92 57 L 92 72 L 76 80 Z" fill="#c2410c" />
-        <path d="M 69 61.5 L 85 53.5 L 85 56.5 L 69 64.5 Z" fill="#fde047" opacity="0.8"/>
-      </svg>
-    </div>
-  </header>
-
-  <div class="controles-card">
-    <div class="filtros-group">
-      <label for="filtroMes">Mês/Ano:</label>
-      <select id="filtroMes" onchange="mudarMes()">
-        <option value="2026-08" selected>Agosto / 2026</option>
-      </select>
-
-      <label for="filtroData">Data:</label>
-      <select id="filtroData" onchange="filtrar()">
-        <option value="GERAL">Visão Geral do Mês</option>
-      </select>
-
-      <label for="buscaLoja">Loja:</label>
-      <input type="text" id="buscaLoja" placeholder="Pesquisar loja..." oninput="filtrar()">
-
-      <button class="btn-export" onclick="exportarExcel()">📊 Exportar Excel</button>
-    </div>
-
-    <div class="legenda-cores">
-      <span style="color: #64748b; font-weight: 500;">Status:</span>
-      <div class="legenda-item"><span class="dot dot-ok"></span> Até 10%</div>
-      <div class="legenda-item"><span class="dot dot-alerta"></span> 10,01% a 20%</div>
-      <div class="legenda-item"><span class="dot dot-critico"></span> Acima de 20%</div>
-    </div>
-  </div>
-
-  <!-- SEÇÃO SUPERIOR: CARDS KPI + CARD TOP 3 LOJAS CRÍTICAS -->
-  <div class="top-section">
-    
-    <div class="cards">
-      <div class="card">
-        <h3>Qtd Compras</h3>
-        <div class="value" id="cardCompras">0</div>
-      </div>
-      <div class="card">
-        <h3>Total Itens</h3>
-        <div class="value" id="cardItens">0</div>
-      </div>
-      <div class="card" style="border-left-color: #ef4444;">
-        <h3>Excluídos / Rupturas</h3>
-        <div class="value" id="cardExcluidos">0</div>
-      </div>
-      <div class="card" style="border-left-color: #f59e0b;">
-        <h3>% Ruptura Geral</h3>
-        <div class="value" id="cardTaxa">0,00%</div>
-      </div>
-    </div>
-
-    <!-- Card Top 3 Lojas Críticas -->
-    <div class="card-top3">
-      <div class="card-top3-header">
-        <div class="top3-title">
-          <span>🚨</span>
-          <span>TOP 3 LOJAS CRÍTICAS</span>
+    <div class="controls-card">
+      <div class="filters-row">
+        <div class="filter-group">
+          <label>Mês/Ano:</label>
+          <select id="selectMes">
+            <option value="2026-08">Agosto / 2026</option>
+          </select>
         </div>
-        <div class="tooltip-wrapper">
-          <span class="info-icon">i</span>
-          <div class="tooltip-text">
-            O ranking considera a Taxa de Exclusão (% de itens excluídos sobre o total da loja).
-          </div>
+
+        <div class="filter-group">
+          <label>Data:</label>
+          <select id="selectData" onchange="atualizarDashboard()">
+            <option value="todas">Visão Geral do Mês</option>
+          </select>
         </div>
+
+        <div class="filter-group">
+          <label>Loja:</label>
+          <input type="text" id="inputLoja" placeholder="Pesquisar loja..." oninput="atualizarDashboard()">
+        </div>
+
+        <button class="btn-export" onclick="exportarExcel()">📊 Exportar Excel</button>
       </div>
 
-      <div class="top3-list" id="listaTop3">
-        <!-- Renderizado Dinamicamente -->
+      <div class="status-legend">
+        <span>Status:</span>
+        <span><span class="dot dot-green"></span>Até 10%</span>
+        <span><span class="dot dot-orange"></span>10,01% a 20%</span>
+        <span><span class="dot dot-red"></span>Acima de 20%</span>
       </div>
     </div>
 
-  </div>
+    <div class="dashboard-grid">
+      <div class="kpi-card blue">
+        <div class="kpi-title">QTD COMPRAS</div>
+        <div class="kpi-value" id="kpiCompras">0</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-title">TOTAL ITENS</div>
+        <div class="kpi-value" id="kpiItens">0</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-title">EXCLUÍDOS / RUPTURAS</div>
+        <div class="kpi-value" id="kpiExcluidos">0</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-title">% RUPTURA GERAL</div>
+        <div class="kpi-value" id="kpiPctGeral">0,00%</div>
+      </div>
 
-  <!-- Tabela Principal -->
-  <div class="table-container">
-    <table id="tabelaDados">
-      <thead>
-        <tr>
-          <th onclick="ordenarPor('loja')">Loja <span class="sort-icon" id="sort-loja">↕</span></th>
-          <th onclick="ordenarPor('compras')">Qtd Compra <span class="sort-icon" id="sort-compras">↕</span></th>
-          <th onclick="ordenarPor('itens')">Total Itens <span class="sort-icon" id="sort-itens">↕</span></th>
-          <th onclick="ordenarPor('excluidos')">Excluídos <span class="sort-icon" id="sort-excluidos">↕</span></th>
-          <th onclick="ordenarPor('taxa')">% Ruptura <span class="sort-icon" id="sort-taxa">↕</span></th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-  </div>
+      <div class="critical-card">
+        <div class="critical-title">🚨 TOP 3 LOJAS CRÍTICAS</div>
+        <div id="containerCritical"></div>
+      </div>
+    </div>
 
-  <!-- Bloco do Histórico Diário -->
-  <div class="secao-detalhamento" id="blocoHistoricoLoja">
-    <h2>📅 Histórico Diário - <span id="nomeLojaHistorico" style="color: #2563eb;"></span></h2>
-    <div class="table-container" style="box-shadow: none; margin-bottom: 0;">
+    <div class="table-container">
       <table>
         <thead>
           <tr>
-            <th>Data</th>
-            <th>Qtd Compra</th>
-            <th>Total Itens</th>
-            <th>Excluídos</th>
-            <th>% Ruptura</th>
+            <th>Loja ↕</th>
+            <th>Qtd Compra ↕</th>
+            <th>Total Itens ↕</th>
+            <th>Excluídos ↕</th>
+            <th>% Ruptura 🔻</th>
           </tr>
         </thead>
-        <tbody id="tbodyHistoricoLoja">
-        </tbody>
+        <tbody id="tabelaCorpo"></tbody>
       </table>
     </div>
   </div>
 
-</div>
+  <script>
+    const dados = [
+      // 01/08/2026
+      { mes: "2026-08", data: "2026-08-01", loja: "WASHINGTON SOARES", compras: 14, itens: 665, excluidos: 76 },
+      { mes: "2026-08", data: "2026-08-01", loja: "MONDUBIM", compras: 10, itens: 688, excluidos: 31 },
+      { mes: "2026-08", data: "2026-08-01", loja: "ANTONIO SALES", compras: 14, itens: 707, excluidos: 81 },
+      { mes: "2026-08", data: "2026-08-01", loja: "AQUIRAZ", compras: 9, itens: 380, excluidos: 47 },
+      { mes: "2026-08", data: "2026-08-01", loja: "QUIXERAMOBIM", compras: 9, itens: 371, excluidos: 65 },
+      { mes: "2026-08", data: "2026-08-01", loja: "MARANGUAPE", compras: 10, itens: 377, excluidos: 57 },
+      { mes: "2026-08", data: "2026-08-01", loja: "PORTO DAS DUNAS", compras: 5, itens: 101, excluidos: 15 },
+      { mes: "2026-08", data: "2026-08-01", loja: "TIANGUA", compras: 1, itens: 20, excluidos: 1 },
+      { mes: "2026-08", data: "2026-08-01", loja: "CAMBEBA", compras: 1, itens: 43, excluidos: 7 },
+      { mes: "2026-08", data: "2026-08-01", loja: "PREA", compras: 3, itens: 98, excluidos: 22 },
+      { mes: "2026-08", data: "2026-08-01", loja: "SOBRAL", compras: 10, itens: 359, excluidos: 31 },
+      { mes: "2026-08", data: "2026-08-01", loja: "ARACATI", compras: 1, itens: 118, excluidos: 6 },
+      { mes: "2026-08", data: "2026-08-01", loja: "ACARAU", compras: 1, itens: 46, excluidos: 12 },
+      { mes: "2026-08", data: "2026-08-01", loja: "LIMOEIRO", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-01", loja: "QUIXADA", compras: 12, itens: 372, excluidos: 26 },
+      { mes: "2026-08", data: "2026-08-01", loja: "ITAPIPOCA", compras: 10, itens: 268, excluidos: 69 },
 
-<script>
-  function atualizarDataHoraHeader() {
-    const agora = new Date();
-    const dia = String(agora.getDate()).padStart(2, '0');
-    const mes = String(agora.getMonth() + 1).padStart(2, '0');
-    const ano = agora.getFullYear();
-    const horas = String(agora.getHours()).padStart(2, '0');
-    const minutos = String(agora.getMinutes()).padStart(2, '0');
+      // 02/08/2026
+      { mes: "2026-08", data: "2026-08-02", loja: "WASHINGTON SOARES", compras: 5, itens: 160, excluidos: 41 },
+      { mes: "2026-08", data: "2026-08-02", loja: "MONDUBIM", compras: 6, itens: 314, excluidos: 19 },
+      { mes: "2026-08", data: "2026-08-02", loja: "ANTONIO SALES", compras: 7, itens: 227, excluidos: 26 },
+      { mes: "2026-08", data: "2026-08-02", loja: "AQUIRAZ", compras: 9, itens: 492, excluidos: 96 },
+      { mes: "2026-08", data: "2026-08-02", loja: "QUIXERAMOBIM", compras: 2, itens: 66, excluidos: 16 },
+      { mes: "2026-08", data: "2026-08-02", loja: "MARANGUAPE", compras: 3, itens: 65, excluidos: 4 },
+      { mes: "2026-08", data: "2026-08-02", loja: "PORTO DAS DUNAS", compras: 2, itens: 96, excluidos: 9 },
+      { mes: "2026-08", data: "2026-08-02", loja: "TIANGUA", compras: 1, itens: 47, excluidos: 6 },
+      { mes: "2026-08", data: "2026-08-02", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-02", loja: "PREA", compras: 4, itens: 381, excluidos: 53 },
+      { mes: "2026-08", data: "2026-08-02", loja: "SOBRAL", compras: 10, itens: 337, excluidos: 30 },
+      { mes: "2026-08", data: "2026-08-02", loja: "ARACATI", compras: 5, itens: 405, excluidos: 14 },
+      { mes: "2026-08", data: "2026-08-02", loja: "ACARAU", compras: 3, itens: 179, excluidos: 37 },
+      { mes: "2026-08", data: "2026-08-02", loja: "LIMOEIRO", compras: 3, itens: 280, excluidos: 27 },
+      { mes: "2026-08", data: "2026-08-02", loja: "QUIXADA", compras: 8, itens: 340, excluidos: 20 },
+      { mes: "2026-08", data: "2026-08-02", loja: "ITAPIPOCA", compras: 8, itens: 312, excluidos: 67 },
 
-    document.getElementById("dataAtualizacao").innerText = `${dia}/${mes}/${ano} às ${horas}:${minutos}`;
-  }
+      // 03/08/2026
+      { mes: "2026-08", data: "2026-08-03", loja: "WASHINGTON SOARES", compras: 9, itens: 367, excluidos: 62 },
+      { mes: "2026-08", data: "2026-08-03", loja: "MONDUBIM", compras: 9, itens: 344, excluidos: 26 },
+      { mes: "2026-08", data: "2026-08-03", loja: "ANTONIO SALES", compras: 15, itens: 541, excluidos: 68 },
+      { mes: "2026-08", data: "2026-08-03", loja: "AQUIRAZ", compras: 4, itens: 116, excluidos: 16 },
+      { mes: "2026-08", data: "2026-08-03", loja: "QUIXERAMOBIM", compras: 6, itens: 125, excluidos: 12 },
+      { mes: "2026-08", data: "2026-08-03", loja: "MARANGUAPE", compras: 3, itens: 131, excluidos: 17 },
+      { mes: "2026-08", data: "2026-08-03", loja: "PORTO DAS DUNAS", compras: 3, itens: 73, excluidos: 4 },
+      { mes: "2026-08", data: "2026-08-03", loja: "TIANGUA", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-03", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-03", loja: "PREA", compras: 3, itens: 104, excluidos: 24 },
+      { mes: "2026-08", data: "2026-08-03", loja: "SOBRAL", compras: 9, itens: 535, excluidos: 43 },
+      { mes: "2026-08", data: "2026-08-03", loja: "ARACATI", compras: 6, itens: 296, excluidos: 28 },
+      { mes: "2026-08", data: "2026-08-03", loja: "ACARAU", compras: 1, itens: 10, excluidos: 4 },
+      { mes: "2026-08", data: "2026-08-03", loja: "LIMOEIRO", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-03", loja: "QUIXADA", compras: 7, itens: 247, excluidos: 31 },
+      { mes: "2026-08", data: "2026-08-03", loja: "ITAPIPOCA", compras: 8, itens: 293, excluidos: 66 },
 
-  const dados = [
-    // 01/08/2026
-    { mes: "2026-08", data: "2026-08-01", loja: "WASHINGTON SOARES", compras: 14, itens: 665, excluidos: 76 },
-    { mes: "2026-08", data: "2026-08-01", loja: "MONDUBIM", compras: 10, itens: 688, excluidos: 31 },
-    { mes: "2026-08", data: "2026-08-01", loja: "ANTONIO SALES", compras: 14, itens: 707, excluidos: 81 },
-    { mes: "2026-08", data: "2026-08-01", loja: "AQUIRAZ", compras: 9, itens: 380, excluidos: 47 },
-    { mes: "2026-08", data: "2026-08-01", loja: "QUIXERAMOBIM", compras: 9, itens: 371, excluidos: 65 },
-    { mes: "2026-08", data: "2026-08-01", loja: "MARANGUAPE", compras: 10, itens: 377, excluidos: 57 },
-    { mes: "2026-08", data: "2026-08-01", loja: "PORTO DAS DUNAS", compras: 5, itens: 101, excluidos: 15 },
-    { mes: "2026-08", data: "2026-08-01", loja: "TIANGUA", compras: 1, itens: 20, excluidos: 1 },
-    { mes: "2026-08", data: "2026-08-01", loja: "CAMBEBA", compras: 1, itens: 43, excluidos: 7 },
-    { mes: "2026-08", data: "2026-08-01", loja: "PREA", compras: 3, itens: 98, excluidos: 22 },
-    { mes: "2026-08", data: "2026-08-01", loja: "SOBRAL", compras: 10, itens: 359, excluidos: 31 },
-    { mes: "2026-08", data: "2026-08-01", loja: "ARACATI", compras: 1, itens: 118, excluidos: 6 },
-    { mes: "2026-08", data: "2026-08-01", loja: "ACARAU", compras: 1, itens: 46, excluidos: 12 },
-    { mes: "2026-08", data: "2026-08-01", loja: "LIMOEIRO", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-01", loja: "QUIXADA", compras: 12, itens: 372, excluidos: 26 },
-    { mes: "2026-08", data: "2026-08-01", loja: "ITAPIPOCA", compras: 10, itens: 268, excluidos: 69 },
+      // 04/08/2026
+      { mes: "2026-08", data: "2026-08-04", loja: "WASHINGTON SOARES", compras: 11, itens: 769, excluidos: 83 },
+      { mes: "2026-08", data: "2026-08-04", loja: "MONDUBIM", compras: 10, itens: 383, excluidos: 21 },
+      { mes: "2026-08", data: "2026-08-04", loja: "ANTONIO SALES", compras: 15, itens: 1054, excluidos: 167 },
+      { mes: "2026-08", data: "2026-08-04", loja: "AQUIRAZ", compras: 5, itens: 150, excluidos: 16 },
+      { mes: "2026-08", data: "2026-08-04", loja: "QUIXERAMOBIM", compras: 6, itens: 205, excluidos: 10 },
+      { mes: "2026-08", data: "2026-08-04", loja: "MARANGUAPE", compras: 3, itens: 105, excluidos: 26 },
+      { mes: "2026-08", data: "2026-08-04", loja: "PORTO DAS DUNAS", compras: 4, itens: 56, excluidos: 4 },
+      { mes: "2026-08", data: "2026-08-04", loja: "TIANGUA", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-04", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-04", loja: "PREA", compras: 10, itens: 260, excluidos: 39 },
+      { mes: "2026-08", data: "2026-08-04", loja: "SOBRAL", compras: 9, itens: 367, excluidos: 71 },
+      { mes: "2026-08", data: "2026-08-04", loja: "ARACATI", compras: 2, itens: 96, excluidos: 13 },
+      { mes: "2026-08", data: "2026-08-04", loja: "ACARAU", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-04", loja: "LIMOEIRO", compras: 2, itens: 18, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-04", loja: "QUIXADA", compras: 9, itens: 282, excluidos: 38 },
+      { mes: "2026-08", data: "2026-08-04", loja: "ITAPIPOCA", compras: 5, itens: 207, excluidos: 40 },
 
-    // 02/08/2026
-    { mes: "2026-08", data: "2026-08-02", loja: "WASHINGTON SOARES", compras: 5, itens: 160, excluidos: 41 },
-    { mes: "2026-08", data: "2026-08-02", loja: "MONDUBIM", compras: 6, itens: 314, excluidos: 19 },
-    { mes: "2026-08", data: "2026-08-02", loja: "ANTONIO SALES", compras: 7, itens: 227, excluidos: 26 },
-    { mes: "2026-08", data: "2026-08-02", loja: "AQUIRAZ", compras: 9, itens: 492, excluidos: 96 },
-    { mes: "2026-08", data: "2026-08-02", loja: "QUIXERAMOBIM", compras: 2, itens: 66, excluidos: 16 },
-    { mes: "2026-08", data: "2026-08-02", loja: "MARANGUAPE", compras: 3, itens: 65, excluidos: 4 },
-    { mes: "2026-08", data: "2026-08-02", loja: "PORTO DAS DUNAS", compras: 2, itens: 96, excluidos: 9 },
-    { mes: "2026-08", data: "2026-08-02", loja: "TIANGUA", compras: 1, itens: 47, excluidos: 6 },
-    { mes: "2026-08", data: "2026-08-02", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-02", loja: "PREA", compras: 4, itens: 381, excluidos: 53 },
-    { mes: "2026-08", data: "2026-08-02", loja: "SOBRAL", compras: 10, itens: 337, excluidos: 30 },
-    { mes: "2026-08", data: "2026-08-02", loja: "ARACATI", compras: 5, itens: 405, excluidos: 14 },
-    { mes: "2026-08", data: "2026-08-02", loja: "ACARAU", compras: 3, itens: 179, excluidos: 37 },
-    { mes: "2026-08", data: "2026-08-02", loja: "LIMOEIRO", compras: 3, itens: 280, excluidos: 27 },
-    { mes: "2026-08", data: "2026-08-02", loja: "QUIXADA", compras: 8, itens: 340, excluidos: 20 },
-    { mes: "2026-08", data: "2026-08-02", loja: "ITAPIPOCA", compras: 8, itens: 312, excluidos: 67 },
+      // 05/08/2026
+      { mes: "2026-08", data: "2026-08-05", loja: "WASHINGTON SOARES", compras: 2, itens: 14, excluidos: 2 },
+      { mes: "2026-08", data: "2026-08-05", loja: "MONDUBIM", compras: 6, itens: 220, excluidos: 12 },
+      { mes: "2026-08", data: "2026-08-05", loja: "ANTONIO SALES", compras: 6, itens: 259, excluidos: 29 },
+      { mes: "2026-08", data: "2026-08-05", loja: "AQUIRAZ", compras: 3, itens: 159, excluidos: 18 },
+      { mes: "2026-08", data: "2026-08-05", loja: "QUIXERAMOBIM", compras: 7, itens: 112, excluidos: 6 },
+      { mes: "2026-08", data: "2026-08-05", loja: "MARANGUAPE", compras: 1, itens: 25, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-05", loja: "PORTO DAS DUNAS", compras: 4, itens: 94, excluidos: 15 },
+      { mes: "2026-08", data: "2026-08-05", loja: "TIANGUA", compras: 2, itens: 24, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-05", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-05", loja: "PREA", compras: 1, itens: 21, excluidos: 2 },
+      { mes: "2026-08", data: "2026-08-05", loja: "SOBRAL", compras: 11, itens: 609, excluidos: 71 },
+      { mes: "2026-08", data: "2026-08-05", loja: "ARACATI", compras: 2, itens: 49, excluidos: 15 },
+      { mes: "2026-08", data: "2026-08-05", loja: "ACARAU", compras: 1, itens: 18, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-05", loja: "LIMOEIRO", compras: 1, itens: 11, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-05", loja: "QUIXADA", compras: 6, itens: 210, excluidos: 31 },
+      { mes: "2026-08", data: "2026-08-05", loja: "ITAPIPOCA", compras: 5, itens: 359, excluidos: 39 },
 
-    // 03/08/2026
-    { mes: "2026-08", data: "2026-08-03", loja: "WASHINGTON SOARES", compras: 9, itens: 367, excluidos: 62 },
-    { mes: "2026-08", data: "2026-08-03", loja: "MONDUBIM", compras: 9, itens: 344, excluidos: 26 },
-    { mes: "2026-08", data: "2026-08-03", loja: "ANTONIO SALES", compras: 15, itens: 541, excluidos: 68 },
-    { mes: "2026-08", data: "2026-08-03", loja: "AQUIRAZ", compras: 4, itens: 116, excluidos: 16 },
-    { mes: "2026-08", data: "2026-08-03", loja: "QUIXERAMOBIM", compras: 6, itens: 125, excluidos: 12 },
-    { mes: "2026-08", data: "2026-08-03", loja: "MARANGUAPE", compras: 3, itens: 131, excluidos: 17 },
-    { mes: "2026-08", data: "2026-08-03", loja: "PORTO DAS DUNAS", compras: 3, itens: 73, excluidos: 4 },
-    { mes: "2026-08", data: "2026-08-03", loja: "TIANGUA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-03", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-03", loja: "PREA", compras: 3, itens: 104, excluidos: 24 },
-    { mes: "2026-08", data: "2026-08-03", loja: "SOBRAL", compras: 9, itens: 535, excluidos: 43 },
-    { mes: "2026-08", data: "2026-08-03", loja: "ARACATI", compras: 6, itens: 296, excluidos: 28 },
-    { mes: "2026-08", data: "2026-08-03", loja: "ACARAU", compras: 1, itens: 10, excluidos: 4 },
-    { mes: "2026-08", data: "2026-08-03", loja: "LIMOEIRO", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-03", loja: "QUIXADA", compras: 7, itens: 247, excluidos: 31 },
-    { mes: "2026-08", data: "2026-08-03", loja: "ITAPIPOCA", compras: 8, itens: 293, excluidos: 66 },
+      // 06/08/2026
+      { mes: "2026-08", data: "2026-08-06", loja: "WASHINGTON SOARES", compras: 20, itens: 666, excluidos: 21 },
+      { mes: "2026-08", data: "2026-08-06", loja: "MONDUBIM", compras: 22, itens: 530, excluidos: 25 },
+      { mes: "2026-08", data: "2026-08-06", loja: "ANTONIO SALES", compras: 20, itens: 647, excluidos: 84 },
+      { mes: "2026-08", data: "2026-08-06", loja: "AQUIRAZ", compras: 13, itens: 481, excluidos: 53 },
+      { mes: "2026-08", data: "2026-08-06", loja: "QUIXERAMOBIM", compras: 7, itens: 139, excluidos: 11 },
+      { mes: "2026-08", data: "2026-08-06", loja: "MARANGUAPE", compras: 6, itens: 234, excluidos: 11 },
+      { mes: "2026-08", data: "2026-08-06", loja: "PORTO DAS DUNAS", compras: 4, itens: 184, excluidos: 29 },
+      { mes: "2026-08", data: "2026-08-06", loja: "TIANGUA", compras: 1, itens: 28, excluidos: 4 },
+      { mes: "2026-08", data: "2026-08-06", loja: "CAMBEBA", compras: 2, itens: 39, excluidos: 2 },
+      { mes: "2026-08", data: "2026-08-06", loja: "PREA", compras: 3, itens: 95, excluidos: 19 },
+      { mes: "2026-08", data: "2026-08-06", loja: "SOBRAL", compras: 13, itens: 661, excluidos: 38 },
+      { mes: "2026-08", data: "2026-08-06", loja: "ARACATI", compras: 9, itens: 471, excluidos: 41 },
+      { mes: "2026-08", data: "2026-08-06", loja: "ACARAU", compras: 4, itens: 524, excluidos: 61 },
+      { mes: "2026-08", data: "2026-08-06", loja: "LIMOEIRO", compras: 7, itens: 94, excluidos: 1 },
+      { mes: "2026-08", data: "2026-08-06", loja: "QUIXADA", compras: 12, itens: 643, excluidos: 86 },
+      { mes: "2026-08", data: "2026-08-06", loja: "ITAPIPOCA", compras: 10, itens: 778, excluidos: 72 },
 
-    // 04/08/2026
-    { mes: "2026-08", data: "2026-08-04", loja: "WASHINGTON SOARES", compras: 11, itens: 769, excluidos: 83 },
-    { mes: "2026-08", data: "2026-08-04", loja: "MONDUBIM", compras: 10, itens: 383, excluidos: 21 },
-    { mes: "2026-08", data: "2026-08-04", loja: "ANTONIO SALES", compras: 15, itens: 1054, excluidos: 167 },
-    { mes: "2026-08", data: "2026-08-04", loja: "AQUIRAZ", compras: 5, itens: 150, excluidos: 16 },
-    { mes: "2026-08", data: "2026-08-04", loja: "QUIXERAMOBIM", compras: 6, itens: 205, excluidos: 10 },
-    { mes: "2026-08", data: "2026-08-04", loja: "MARANGUAPE", compras: 3, itens: 105, excluidos: 26 },
-    { mes: "2026-08", data: "2026-08-04", loja: "PORTO DAS DUNAS", compras: 4, itens: 56, excluidos: 4 },
-    { mes: "2026-08", data: "2026-08-04", loja: "TIANGUA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-04", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-04", loja: "PREA", compras: 10, itens: 260, excluidos: 39 },
-    { mes: "2026-08", data: "2026-08-04", loja: "SOBRAL", compras: 9, itens: 367, excluidos: 71 },
-    { mes: "2026-08", data: "2026-08-04", loja: "ARACATI", compras: 2, itens: 96, excluidos: 13 },
-    { mes: "2026-08", data: "2026-08-04", loja: "ACARAU", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-04", loja: "LIMOEIRO", compras: 2, itens: 18, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-04", loja: "QUIXADA", compras: 9, itens: 282, excluidos: 38 },
-    { mes: "2026-08", data: "2026-08-04", loja: "ITAPIPOCA", compras: 5, itens: 207, excluidos: 40 },
+      // 07/08/2026
+      { mes: "2026-08", data: "2026-08-07", loja: "WASHINGTON SOARES", compras: 5, itens: 235, excluidos: 15 },
+      { mes: "2026-08", data: "2026-08-07", loja: "MONDUBIM", compras: 13, itens: 492, excluidos: 17 },
+      { mes: "2026-08", data: "2026-08-07", loja: "ANTONIO SALES", compras: 10, itens: 368, excluidos: 39 },
+      { mes: "2026-08", data: "2026-08-07", loja: "AQUIRAZ", compras: 14, itens: 623, excluidos: 60 },
+      { mes: "2026-08", data: "2026-08-07", loja: "QUIXERAMOBIM", compras: 9, itens: 338, excluidos: 36 },
+      { mes: "2026-08", data: "2026-08-07", loja: "MARANGUAPE", compras: 1, itens: 32, excluidos: 2 },
+      { mes: "2026-08", data: "2026-08-07", loja: "PORTO DAS DUNAS", compras: 8, itens: 178, excluidos: 18 },
+      { mes: "2026-08", data: "2026-08-07", loja: "TIANGUA", compras: 1, itens: 37, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-07", loja: "CAMBEBA", compras: 1, itens: 24, excluidos: 3 },
+      { mes: "2026-08", data: "2026-08-07", loja: "PREA", compras: 4, itens: 444, excluidos: 22 },
+      { mes: "2026-08", data: "2026-08-07", loja: "SOBRAL", compras: 12, itens: 403, excluidos: 50 },
+      { mes: "2026-08", data: "2026-08-07", loja: "ARACATI", compras: 2, itens: 49, excluidos: 1 },
+      { mes: "2026-08", data: "2026-08-07", loja: "ACARAU", compras: 11, itens: 685, excluidos: 71 },
+      { mes: "2026-08", data: "2026-08-07", loja: "LIMOEIRO", compras: 1, itens: 37, excluidos: 2 },
+      { mes: "2026-08", data: "2026-08-07", loja: "QUIXADA", compras: 14, itens: 511, excluidos: 101 },
+      { mes: "2026-08", data: "2026-08-07", loja: "ITAPIPOCA", compras: 8, itens: 256, excluidos: 30 },
 
-    // 05/08/2026
-    { mes: "2026-08", data: "2026-08-05", loja: "WASHINGTON SOARES", compras: 2, itens: 14, excluidos: 2 },
-    { mes: "2026-08", data: "2026-08-05", loja: "MONDUBIM", compras: 6, itens: 220, excluidos: 12 },
-    { mes: "2026-08", data: "2026-08-05", loja: "ANTONIO SALES", compras: 6, itens: 259, excluidos: 29 },
-    { mes: "2026-08", data: "2026-08-05", loja: "AQUIRAZ", compras: 3, itens: 159, excluidos: 18 },
-    { mes: "2026-08", data: "2026-08-05", loja: "QUIXERAMOBIM", compras: 7, itens: 112, excluidos: 6 },
-    { mes: "2026-08", data: "2026-08-05", loja: "MARANGUAPE", compras: 1, itens: 25, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-05", loja: "PORTO DAS DUNAS", compras: 4, itens: 94, excluidos: 15 },
-    { mes: "2026-08", data: "2026-08-05", loja: "TIANGUA", compras: 2, itens: 24, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-05", loja: "CAMBEBA", compras: 0, itens: 0, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-05", loja: "PREA", compras: 1, itens: 21, excluidos: 2 },
-    { mes: "2026-08", data: "2026-08-05", loja: "SOBRAL", compras: 11, itens: 609, excluidos: 71 },
-    { mes: "2026-08", data: "2026-08-05", loja: "ARACATI", compras: 2, itens: 49, excluidos: 15 },
-    { mes: "2026-08", data: "2026-08-05", loja: "ACARAU", compras: 1, itens: 18, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-05", loja: "LIMOEIRO", compras: 1, itens: 11, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-05", loja: "QUIXADA", compras: 6, itens: 210, excluidos: 31 },
-    { mes: "2026-08", data: "2026-08-05", loja: "ITAPIPOCA", compras: 5, itens: 359, excluidos: 39 },
+      // 08/08/2026
+      { mes: "2026-08", data: "2026-08-08", loja: "WASHINGTON SOARES", compras: 6, itens: 242, excluidos: 11 },
+      { mes: "2026-08", data: "2026-08-08", loja: "MONDUBIM", compras: 14, itens: 373, excluidos: 9 },
+      { mes: "2026-08", data: "2026-08-08", loja: "ANTONIO SALES", compras: 13, itens: 373, excluidos: 58 },
+      { mes: "2026-08", data: "2026-08-08", loja: "AQUIRAZ", compras: 21, itens: 624, excluidos: 47 },
+      { mes: "2026-08", data: "2026-08-08", loja: "QUIXERAMOBIM", compras: 34, itens: 331, excluidos: 18 },
+      { mes: "2026-08", data: "2026-08-08", loja: "MARANGUAPE", compras: 11, itens: 215, excluidos: 25 },
+      { mes: "2026-08", data: "2026-08-08", loja: "PORTO DAS DUNAS", compras: 1, itens: 30, excluidos: 1 },
+      { mes: "2026-08", data: "2026-08-08", loja: "TIANGUA", compras: 9, itens: 17, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-08", loja: "CAMBEBA", compras: 1, itens: 5, excluidos: 0 },
+      { mes: "2026-08", data: "2026-08-08", loja: "PREA", compras: 13, itens: 204, excluidos: 18 },
+      { mes: "2026-08", data: "2026-08-08", loja: "SOBRAL", compras: 34, itens: 1216, excluidos: 69 },
+      { mes: "2026-08", data: "2026-08-08", loja: "ARACATI", compras: 9, itens: 331, excluidos: 37 },
+      { mes: "2026-08", data: "2026-08-08", loja: "ACARAU", compras: 13, itens: 97, excluidos: 17 },
+      { mes: "2026-08", data: "2026-08-08", loja: "LIMOEIRO", compras: 12, itens: 120, excluidos: 8 },
+      { mes: "2026-08", data: "2026-08-08", loja: "QUIXADA", compras: 47, itens: 852, excluidos: 129 },
+      { mes: "2026-08", data: "2026-08-08", loja: "ITAPIPOCA", compras: 31, itens: 463, excluidos: 96 }
+    ];
 
-    // 06/08/2026
-    { mes: "2026-08", data: "2026-08-06", loja: "WASHINGTON SOARES", compras: 20, itens: 666, excluidos: 21 },
-    { mes: "2026-08", data: "2026-08-06", loja: "MONDUBIM", compras: 22, itens: 530, excluidos: 25 },
-    { mes: "2026-08", data: "2026-08-06", loja: "ANTONIO SALES", compras: 20, itens: 647, excluidos: 84 },
-    { mes: "2026-08", data: "2026-08-06", loja: "AQUIRAZ", compras: 13, itens: 481, excluidos: 53 },
-    { mes: "2026-08", data: "2026-08-06", loja: "QUIXERAMOBIM", compras: 7, itens: 139, excluidos: 11 },
-    { mes: "2026-08", data: "2026-08-06", loja: "MARANGUAPE", compras: 6, itens: 234, excluidos: 11 },
-    { mes: "2026-08", data: "2026-08-06", loja: "PORTO DAS DUNAS", compras: 4, itens: 184, excluidos: 29 },
-    { mes: "2026-08", data: "2026-08-06", loja: "TIANGUA", compras: 1, itens: 28, excluidos: 4 },
-    { mes: "2026-08", data: "2026-08-06", loja: "CAMBEBA", compras: 2, itens: 39, excluidos: 2 },
-    { mes: "2026-08", data: "2026-08-06", loja: "PREA", compras: 3, itens: 95, excluidos: 19 },
-    { mes: "2026-08", data: "2026-08-06", loja: "SOBRAL", compras: 13, itens: 661, excluidos: 38 },
-    { mes: "2026-08", data: "2026-08-06", loja: "ARACATI", compras: 9, itens: 471, excluidos: 41 },
-    { mes: "2026-08", data: "2026-08-06", loja: "ACARAU", compras: 4, itens: 524, excluidos: 61 },
-    { mes: "2026-08", data: "2026-08-06", loja: "LIMOEIRO", compras: 7, itens: 94, excluidos: 1 },
-    { mes: "2026-08", data: "2026-08-06", loja: "QUIXADA", compras: 12, itens: 643, excluidos: 86 },
-    { mes: "2026-08", data: "2026-08-06", loja: "ITAPIPOCA", compras: 10, itens: 778, excluidos: 72 },
+    function inicializar() {
+      const selectData = document.getElementById('selectData');
+      const datas = [...new Set(dados.map(item => item.data))].sort();
+      
+      datas.forEach(d => {
+        const option = document.createElement('option');
+        option.value = d;
+        option.textContent = d.split('-').reverse().join('/');
+        selectData.appendChild(option);
+      });
 
-    // 07/08/2026
-    { mes: "2026-08", data: "2026-08-07", loja: "WASHINGTON SOARES", compras: 5, itens: 235, excluidos: 15 },
-    { mes: "2026-08", data: "2026-08-07", loja: "MONDUBIM", compras: 13, itens: 492, excluidos: 17 },
-    { mes: "2026-08", data: "2026-08-07", loja: "ANTONIO SALES", compras: 10, itens: 368, excluidos: 39 },
-    { mes: "2026-08", data: "2026-08-07", loja: "AQUIRAZ", compras: 14, itens: 623, excluidos: 60 },
-    { mes: "2026-08", data: "2026-08-07", loja: "QUIXERAMOBIM", compras: 9, itens: 338, excluidos: 36 },
-    { mes: "2026-08", data: "2026-08-07", loja: "MARANGUAPE", compras: 1, itens: 32, excluidos: 2 },
-    { mes: "2026-08", data: "2026-08-07", loja: "PORTO DAS DUNAS", compras: 8, itens: 178, excluidos: 18 },
-    { mes: "2026-08", data: "2026-08-07", loja: "TIANGUA", compras: 1, itens: 37, excluidos: 0 },
-    { mes: "2026-08", data: "2026-08-07", loja: "CAMBEBA", compras: 1, itens: 24, excluidos: 3 },
-    { mes: "2026-08", data: "2026-08-07", loja: "PREA", compras: 4, itens: 444, excluidos: 22 },
-    { mes: "2026-08", data: "2026-08-07", loja: "SOBRAL", compras: 12, itens: 403, excluidos: 50 },
-    { mes: "2026-08", data: "2026-08-07", loja: "ARACATI", compras: 2, itens: 49, excluidos: 1 },
-    { mes: "2026-08", data: "2026-08-07", loja: "ACARAU", compras: 11, itens: 685, excluidos: 71 },
-    { mes: "2026-08", data: "2026-08-07", loja: "LIMOEIRO", compras: 1, itens: 37, excluidos: 2 },
-    { mes: "2026-08", data: "2026-08-07", loja: "QUIXADA", compras: 14, itens: 511, excluidos: 101 },
-    { mes: "2026-08", data: "2026-08-07", loja: "ITAPIPOCA", compras: 8, itens: 256, excluidos: 30 }
-  ];
-
-  let listaExibida = [];
-  let listaCompletaConsolidada = [];
-  let colunaOrdenacao = 'taxa';
-  let direcaoOrdenacao = 'desc';
-
-  function inicializarDatas() {
-    atualizarDataHoraHeader();
-    const mesSel = document.getElementById("filtroMes").value;
-    const selectData = document.getElementById("filtroData");
-    selectData.innerHTML = '<option value="GERAL">Visão Geral do Mês</option>';
-
-    const datasDoMes = [...new Set(dados.filter(d => d.mes === mesSel).map(d => d.data))].sort();
-    datasDoMes.forEach(d => {
-      const parts = d.split('-');
-      const dataFormatada = `${parts[2]}/${parts[1]}/${parts[0]}`;
-      const opt = document.createElement("option");
-      opt.value = d;
-      opt.textContent = dataFormatada;
-      selectData.appendChild(opt);
-    });
-
-    filtrar();
-  }
-
-  function mudarMes() {
-    inicializarDatas();
-  }
-
-  function obterClasseStatus(taxa) {
-    const valor = parseFloat(taxa);
-    if (valor <= 10) return "status-ok";
-    if (valor <= 20) return "status-alerta";
-    return "status-critico";
-  }
-
-  function filtrar() {
-    const mesSel = document.getElementById("filtroMes").value;
-    const dataSel = document.getElementById("filtroData").value;
-    const termoBusca = document.getElementById("buscaLoja").value.toLowerCase().trim();
-
-    let filtrados = dados.filter(d => d.mes === mesSel);
-    if (dataSel !== "GERAL") {
-      filtrados = filtrados.filter(d => d.data === dataSel);
+      atualizarDashboard();
     }
 
-    const consolidado = {};
-    let totCompras = 0, totItens = 0, totExcluidos = 0;
+    function atualizarDashboard() {
+      const dataSel = document.getElementById('selectData').value;
+      const buscaLoja = document.getElementById('inputLoja').value.toLowerCase();
 
-    filtrados.forEach(item => {
-      if (!consolidado[item.loja]) {
-        consolidado[item.loja] = { loja: item.loja, compras: 0, itens: 0, excluidos: 0 };
+      // Filtrar dados por data
+      let dadosFiltrados = dados;
+      if (dataSel !== 'todas') {
+        dadosFiltrados = dados.filter(item => item.data === dataSel);
       }
-      consolidado[item.loja].compras += item.compras;
-      consolidado[item.loja].itens += item.itens;
-      consolidado[item.loja].excluidos += item.excluidos;
 
-      totCompras += item.compras;
-      totItens += item.itens;
-      totExcluidos += item.excluidos;
-    });
+      // Agrupar por loja
+      const resumoLojas = {};
+      dadosFiltrados.forEach(item => {
+        if (!resumoLojas[item.loja]) {
+          resumoLojas[item.loja] = { compras: 0, itens: 0, excluidos: 0 };
+        }
+        resumoLojas[item.loja].compras += item.compras;
+        resumoLojas[item.loja].itens += item.itens;
+        resumoLojas[item.loja].excluidos += item.excluidos;
+      });
 
-    document.getElementById("cardCompras").innerText = totCompras.toLocaleString("pt-BR");
-    document.getElementById("cardItens").innerText = totItens.toLocaleString("pt-BR");
-    document.getElementById("cardExcluidos").innerText = totExcluidos.toLocaleString("pt-BR");
-    
-    const taxaGeral = totItens > 0 ? ((totExcluidos / totItens) * 100).toFixed(2) : "0,00";
-    document.getElementById("cardTaxa").innerText = taxaGeral.replace('.', ',') + "%";
+      // Converter para array
+      let listaLojas = Object.keys(resumoLojas).map(loja => {
+        const d = resumoLojas[loja];
+        const pct = d.itens > 0 ? (d.excluidos / d.itens) * 100 : 0;
+        return { loja, compras: d.compras, itens: d.itens, excluidos: d.excluidos, pct };
+      });
 
-    listaCompletaConsolidada = Object.values(consolidado).map(item => {
-      const taxaNum = item.itens > 0 ? (item.excluidos / item.itens) * 100 : 0;
-      return { ...item, taxa: taxaNum };
-    });
+      // Calcular KPIs Globais
+      const totCompras = listaLojas.reduce((a, b) => a + b.compras, 0);
+      const totItens = listaLojas.reduce((a, b) => a + b.itens, 0);
+      const totExcluidos = listaLojas.reduce((a, b) => a + b.excluidos, 0);
+      const pctGeral = totItens > 0 ? (totExcluidos / totItens) * 100 : 0;
 
-    listaExibida = [...listaCompletaConsolidada];
+      document.getElementById('kpiCompras').textContent = totCompras.toLocaleString('pt-BR');
+      document.getElementById('kpiItens').textContent = totItens.toLocaleString('pt-BR');
+      document.getElementById('kpiExcluidos').textContent = totExcluidos.toLocaleString('pt-BR');
+      document.getElementById('kpiPctGeral').textContent = pctGeral.toFixed(2).replace('.', ',') + '%';
 
-    if (termoBusca !== "") {
-      listaExibida = listaExibida.filter(item => item.loja.toLowerCase().includes(termoBusca));
-    }
+      // Ordenar por % de Ruptura decrescente
+      listaLojas.sort((a, b) => b.pct - a.pct);
 
-    aplicarOrdenacaoERenderizar();
-    renderizarTop3();
-    atualizarHistoricoLoja(mesSel, dataSel, termoBusca);
-  }
-
-  function renderizarTop3() {
-    const containerTop3 = document.getElementById("listaTop3");
-    containerTop3.innerHTML = "";
-
-    const top3 = [...listaCompletaConsolidada]
-      .filter(loja => loja.itens > 0)
-      .sort((a, b) => b.taxa - a.taxa)
-      .slice(0, 3);
-
-    const classesRank = ["rank-1", "rank-2", "rank-3"];
-
-    top3.forEach((item, index) => {
-      const taxaStr = item.taxa.toFixed(2).replace('.', ',');
-      const div = document.createElement("div");
-      div.className = `top3-item ${classesRank[index]}`;
-      div.innerHTML = `
-        <div>
-          <div class="top3-loja">${index + 1}º ${item.loja}</div>
-          <div class="top3-subtext">
-            <strong>${item.excluidos.toLocaleString("pt-BR")}</strong> excluídos de <strong>${item.itens.toLocaleString("pt-BR")}</strong> itens
+      // Renderizar Top 3 Lojas Criticas
+      const containerCritical = document.getElementById('containerCritical');
+      containerCritical.innerHTML = '';
+      listaLojas.slice(0, 3).forEach((item, index) => {
+        containerCritical.innerHTML += `
+          <div class="critical-item">
+            <div>
+              <div class="critical-store-name">${index + 1}º ${item.loja}</div>
+              <div class="critical-store-sub">${item.excluidos.toLocaleString('pt-BR')} excluídos de ${item.itens.toLocaleString('pt-BR')} itens</div>
+            </div>
+            <div class="critical-store-pct">${item.pct.toFixed(2).replace('.', ',')}%</div>
           </div>
-        </div>
-        <div class="top3-badge">${taxaStr}%</div>
-      `;
-      containerTop3.appendChild(div);
-    });
-  }
+        `;
+      });
 
-  function aplicarOrdenacaoERenderizar() {
-    ['loja', 'compras', 'itens', 'excluidos', 'taxa'].forEach(col => {
-      const el = document.getElementById(`sort-${col}`);
-      if (col === colunaOrdenacao) {
-        el.innerText = direcaoOrdenacao === 'asc' ? '▲' : '▼';
-        el.style.color = '#2563eb';
-      } else {
-        el.innerText = '↕';
-        el.style.color = '#94a3b8';
+      // Filtrar por pesquisa de loja para a tabela
+      if (buscaLoja) {
+        listaLojas = listaLojas.filter(item => item.loja.toLowerCase().includes(buscaLoja));
       }
-    });
 
-    listaExibida.sort((a, b) => {
-      let valA = a[colunaOrdenacao];
-      let valB = b[colunaOrdenacao];
+      // Renderizar Tabela
+      const tbody = document.getElementById('tabelaCorpo');
+      tbody.innerHTML = '';
+      listaLojas.forEach(item => {
+        let badgeClass = 'bg-green';
+        if (item.pct > 20) badgeClass = 'bg-red';
+        else if (item.pct > 10) badgeClass = 'bg-orange';
 
-      if (typeof valA === 'string') {
-        return direcaoOrdenacao === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-      }
-      return direcaoOrdenacao === 'asc' ? valA - valB : valB - valA;
-    });
-
-    const tbody = document.querySelector("#tabelaDados tbody");
-    tbody.innerHTML = "";
-
-    listaExibida.forEach(d => {
-      const taxaStr = d.taxa.toFixed(2);
-      const classeColor = obterClasseStatus(taxaStr);
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><strong>${d.loja}</strong></td>
-        <td>${d.compras.toLocaleString("pt-BR")}</td>
-        <td>${d.itens.toLocaleString("pt-BR")}</td>
-        <td>${d.excluidos.toLocaleString("pt-BR")}</td>
-        <td><span class="badge-status ${classeColor}">${taxaStr.replace('.', ',')}%</span></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function atualizarHistoricoLoja(mesSel, dataSel, termoBusca) {
-    const bloco = document.getElementById("blocoHistoricoLoja");
-    
-    if (dataSel === "GERAL" && termoBusca.length >= 3 && listaExibida.length === 1) {
-      const nomeLoja = listaExibida[0].loja;
-      document.getElementById("nomeLojaHistorico").innerText = nomeLoja;
-
-      const registrosLoja = dados.filter(d => d.mes === mesSel && d.loja === nomeLoja).sort((a,b) => a.data.localeCompare(b.data));
-
-      const tbody = document.getElementById("tbodyHistoricoLoja");
-      tbody.innerHTML = "";
-
-      registrosLoja.forEach(d => {
-        const parts = d.data.split('-');
-        const dataFormatada = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        const taxaNum = d.itens > 0 ? (d.excluidos / d.itens) * 100 : 0;
-        const taxaStr = taxaNum.toFixed(2);
-        const classeColor = obterClasseStatus(taxaStr);
-
-        const tr = document.createElement("tr");
+        const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>${dataFormatada}</strong></td>
-          <td>${d.compras.toLocaleString("pt-BR")}</td>
-          <td>${d.itens.toLocaleString("pt-BR")}</td>
-          <td>${d.excluidos.toLocaleString("pt-BR")}</td>
-          <td><span class="badge-status ${classeColor}">${taxaStr.replace('.', ',')}%</span></td>
+          <td><strong>${item.loja}</strong></td>
+          <td>${item.compras.toLocaleString('pt-BR')}</td>
+          <td>${item.itens.toLocaleString('pt-BR')}</td>
+          <td>${item.excluidos.toLocaleString('pt-BR')}</td>
+          <td><span class="badge-pct ${badgeClass}">${item.pct.toFixed(2).replace('.', ',')}%</span></td>
         `;
         tbody.appendChild(tr);
       });
-
-      bloco.style.display = "block";
-    } else {
-      bloco.style.display = "none";
-    }
-  }
-
-  function ordenarPor(coluna) {
-    if (colunaOrdenacao === coluna) {
-      direcaoOrdenacao = direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
-    } else {
-      colunaOrdenacao = coluna;
-      direcaoOrdenacao = coluna === 'loja' ? 'asc' : 'desc';
-    }
-    aplicarOrdenacaoERenderizar();
-  }
-
-  function exportarExcel() {
-    if (listaExibida.length === 0) {
-      alert("Não há dados para exportar com os filtros atuais.");
-      return;
     }
 
-    const mesSel = document.getElementById("filtroMes").value;
-    const dataSel = document.getElementById("filtroData").value;
-    const termoBusca = document.getElementById("buscaLoja").value.toLowerCase().trim();
-    const nomeArquivo = dataSel === "GERAL" ? "Relatorio_Ruptura_Geral_Mes.csv" : `Relatorio_Ruptura_${dataSel}.csv`;
-
-    let csvContent = "\uFEFF"; 
-
-    if (dataSel === "GERAL" && termoBusca.length >= 3 && listaExibida.length === 1) {
-      const nomeLoja = listaExibida[0].loja;
-      
-      csvContent += `RESUMO DO MES - ${nomeLoja}\n`;
-      csvContent += "Loja;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
-      const resumo = listaExibida[0];
-      const taxaResumo = resumo.taxa.toFixed(2).replace('.', ',');
-      csvContent += `"${resumo.loja}";${resumo.compras};${resumo.itens};${resumo.excluidos};"${taxaResumo}%"\n\n`;
-
-      csvContent += `HISTORICO DIARIO - ${nomeLoja}\n`;
-      csvContent += "Data;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
-
-      const registrosLoja = dados.filter(d => d.mes === mesSel && d.loja === nomeLoja).sort((a,b) => a.data.localeCompare(b.data));
-
-      registrosLoja.forEach(d => {
-        const parts = d.data.split('-');
-        const dataFormatada = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        const taxaNum = d.itens > 0 ? (d.excluidos / d.itens) * 100 : 0;
-        const taxaStr = taxaNum.toFixed(2).replace('.', ',');
-        csvContent += `"${dataFormatada}";${d.compras};${d.itens};${d.excluidos};"${taxaStr}%"\n`;
-      });
-
-    } else {
-      csvContent += "Loja;Qtd Compra;Total Itens;Excluidos;% Ruptura\n";
-      listaExibida.forEach(d => {
-        const taxaStr = d.taxa.toFixed(2).replace('.', ',');
-        csvContent += `"${d.loja}";${d.compras};${d.itens};${d.excluidos};"${taxaStr}%"\n`;
-      });
+    function exportarExcel() {
+      const table = document.querySelector("table");
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Rupturas" });
+      XLSX.writeFile(wb, "Rupturas_Loja_Online.xlsx");
     }
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", nomeArquivo);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  window.onload = inicializarDatas;
-</script>
-
+    window.onload = inicializar;
+  </script>
 </body>
 </html>
