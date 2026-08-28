@@ -69,7 +69,7 @@
   <div class="container">
     <div class="header">
       <h1>RUPTURAS DA LOJA ONLINE</h1>
-      <p>Status: <span id="lblStatus" class="status-sync">Sincronizando com Google Sheets...</span></p>
+      <p>Status: <span id="lblStatus" class="status-sync">Conectando...</span></p>
     </div>
 
     <div class="controls-card">
@@ -145,23 +145,22 @@
   </div>
 
   <script>
-    // LINK DA SUA PLANILHA DE RUPTURAS (GOOGLE SHEETS CSV)
     const URL_RUPTURAS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT0KwpuVk1bxrb_DLjb9wVVnvLNzlYcZN-UWt7seAAzAjgyoF5Hmd9wzSeGFWgGWM11WTOf7LCpIf6b/pub?output=csv";
 
     let dadosGlobais = [];
 
     async function buscarDados() {
       try {
-        const response = await fetch(URL_RUPTURAS + "&cache=" + new Date().getTime());
+        const response = await fetch(URL_RUPTURAS + "&t=" + new Date().getTime());
         const csvText = await response.text();
         const rows = parseCSV(csvText);
         
         if (rows.length > 1) {
-            processarDadosCSV(rows);
+            processarDadosDinamico(rows);
             document.getElementById('lblStatus').innerText = "✅ Sincronizado com Google Sheets";
         }
       } catch (err) {
-        document.getElementById('lblStatus').innerText = "❌ Erro ao conectar com a planilha.";
+        document.getElementById('lblStatus').innerText = "❌ Erro na conexão.";
         console.error(err);
       }
     }
@@ -173,33 +172,40 @@
         });
     }
 
-    function processarDadosCSV(rows) {
-      // Mapeamento: 2:Loja, 3:Data, 4:Compras, 5:Itens, 6:Excluidos (Baseado na estrutura do Sheets)
-      dadosGlobais = rows.slice(1).map(row => {
-          if(!row[3] || !row[2]) return null;
-          return {
-              mes: "2026-08",
-              data: row[4], // Ajustado para a coluna de data
-              loja: row[3], // Ajustado para a coluna de loja
-              compras: parseInt(row[5]) || 0,
-              itens: parseInt(row[6]) || 0,
-              excluidos: parseInt(row[7]) || 0
-          };
-      }).filter(i => i !== null);
+    function processarDadosDinamico(rows) {
+      // Identifica a linha do cabeçalho
+      let headerIdx = rows.findIndex(r => r.some(c => c && c.toString().toLowerCase().includes("loja")));
+      if (headerIdx === -1) headerIdx = 0;
 
-      // Preencher o filtro de data dinamicamente
-      const selectData = document.getElementById('selectData');
-      const datasUnicas = [...new Set(dadosGlobais.map(item => item.data))].sort();
+      const header = rows[headerIdx].map(h => h ? h.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "");
       
-      // Limpa as opções antigas (mantendo a primeira)
+      // Mapeamento automático por nome de coluna
+      const idxLoja = header.findIndex(h => h.includes("loja"));
+      const idxData = header.findIndex(h => h.includes("data"));
+      const idxCompras = header.findIndex(h => h.includes("compra") || h.includes("qtd"));
+      const idxItens = header.findIndex(h => h.includes("itens") || h.includes("total"));
+      const idxExcluidos = header.findIndex(h => h.includes("exclui") || h.includes("ruptura"));
+
+      dadosGlobais = rows.slice(headerIdx + 1).filter(r => r[idxLoja] && r[idxLoja] !== "").map(row => {
+          return {
+              data: row[idxData] || "-",
+              loja: row[idxLoja],
+              compras: parseInt(row[idxCompras]) || 0,
+              itens: parseInt(row[idxItens]) || 0,
+              excluidos: parseInt(row[idxExcluidos]) || 0
+          };
+      });
+
+      // Preencher o filtro de data
+      const selectData = document.getElementById('selectData');
+      const datasUnicas = [...new Set(dadosGlobais.map(item => item.data))].filter(d => d !== "-").sort();
+      
       selectData.innerHTML = '<option value="todas">Visão Geral do Mês</option>';
       datasUnicas.forEach(d => {
-        if(d && d !== "undefined") {
-            const option = document.createElement('option');
-            option.value = d;
-            option.textContent = d;
-            selectData.appendChild(option);
-        }
+          const option = document.createElement('option');
+          option.value = d;
+          option.textContent = d;
+          selectData.appendChild(option);
       });
 
       atualizarDashboard();
@@ -209,10 +215,7 @@
       const dataSel = document.getElementById('selectData').value;
       const buscaLoja = document.getElementById('inputLoja').value.toLowerCase();
 
-      let dadosFiltrados = dadosGlobais;
-      if (dataSel !== 'todas') {
-        dadosFiltrados = dadosGlobais.filter(item => item.data === dataSel);
-      }
+      let dadosFiltrados = dataSel === 'todas' ? dadosGlobais : dadosGlobais.filter(item => item.data === dataSel);
 
       const resumoLojas = {};
       dadosFiltrados.forEach(item => {
@@ -250,18 +253,19 @@
           <div class="critical-item">
             <div>
               <div class="critical-store-name">${index + 1}º ${item.loja}</div>
-              <div class="critical-store-sub">${item.excluidos} excl. de ${item.itens} itens</div>
+              <div class="critical-store-sub">${item.excluidos.toLocaleString('pt-BR')} excl. de ${item.itens.toLocaleString('pt-BR')} itens</div>
             </div>
             <div class="critical-store-pct">${item.pct.toFixed(2).replace('.', ',')}%</div>
           </div>
         `;
       });
 
-      // Tabela Principal
+      // Filtro de pesquisa de loja
       if (buscaLoja) {
         listaLojas = listaLojas.filter(item => item.loja.toLowerCase().includes(buscaLoja));
       }
 
+      // Tabela Principal
       const tbody = document.getElementById('tabelaCorpo');
       tbody.innerHTML = '';
       listaLojas.forEach(item => {
@@ -284,7 +288,7 @@
     function exportarExcel() {
       const table = document.getElementById("tabelaDados");
       const wb = XLSX.utils.table_to_book(table, { sheet: "Rupturas" });
-      XLSX.writeFile(wb, "Rupturas_Online_Consolidado.xlsx");
+      XLSX.writeFile(wb, "Rupturas_Consolidado.xlsx");
     }
 
     window.onload = buscarDados;
