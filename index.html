@@ -10,10 +10,9 @@
         :root { --bg-body: #0a0a0c; --card-bg: #1c1c1e; --pinheiro-orange: #f38218; --pinheiro-red: #ef4444; --text-main: #ffffff; --text-dim: #a1a1aa; --border: rgba(255, 255, 255, 0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); padding: 30px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .title-group h1 { font-size: 26px; font-weight: 800; text-transform: uppercase; }
-        .status-pill { background: var(--card-bg); padding: 8px 16px; border-radius: 50px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); margin-top: 10px; width: fit-content; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
+        .status-pill { background: var(--card-bg); padding: 8px 16px; border-radius: 50px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); }
         .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pinheiro-orange); box-shadow: 0 0 10px var(--pinheiro-orange); }
         .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
         .card-kpi { background: var(--card-bg); padding: 25px; border-radius: 24px; border: 1px solid var(--border); border-bottom: 4px solid var(--pinheiro-orange); }
@@ -21,17 +20,18 @@
         .kpi-value { font-size: 24px; font-weight: 800; margin-top: 8px; display: block; }
         .table-section { background: var(--card-bg); padding: 25px; border-radius: 24px; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; padding: 15px; background: #111827; color: var(--text-dim); border-bottom: 1px solid var(--border); }
+        th { text-align: left; padding: 15px; background: #111827; color: var(--text-dim); }
         td { padding: 15px; border-bottom: 1px solid var(--border); }
         .badge-pct { padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+        select { background:#000; color:white; padding:8px 15px; border-radius:10px; border:1px solid var(--border); outline:none; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="title-group">
-                <h1>Controle de Ruptura Online</h1>
-                <div class="status-pill"><div class="dot"></div> Sincronizado Operacional</div>
+            <div>
+                <h1 style="font-size:26px; font-weight:800">Controle de Ruptura Online</h1>
+                <div class="status-pill" style="margin-top:10px"><div class="dot"></div> Sincronizado Operação</div>
             </div>
             <img src="https://raw.githubusercontent.com/CamilaDS13/imagens/Principal/logobranca.png" style="height: 35px;">
         </header>
@@ -39,14 +39,14 @@
         <div class="metrics-grid">
             <div class="card-kpi"><span class="kpi-label">Qtd Compras</span><span id="kpi-compras" class="kpi-value">0</span></div>
             <div class="card-kpi"><span class="kpi-label">Total Itens</span><span id="kpi-itens" class="kpi-value">0</span></div>
-            <div class="card-kpi"><span class="kpi-label">Excluídos</span><span id="kpi-excluidos" class="kpi-value">0</span></div>
+            <div class="card-kpi"><span class="kpi-label">Excluídos (Ruptura)</span><span id="kpi-excluidos" class="kpi-value">0</span></div>
             <div class="card-kpi"><span class="kpi-label">% Ruptura Geral</span><span id="kpi-pct" class="kpi-value">0,00%</span></div>
         </div>
 
         <div class="table-section">
             <div style="display:flex; justify-content: space-between; margin-bottom: 20px; align-items:center">
                 <h3>Impacto por Loja</h3>
-                <select id="dataFilter" onchange="atualizar()" style="background:#000; color:white; padding:8px 15px; border-radius:10px; border:1px solid var(--border)"></select>
+                <select id="dataFilter" onchange="atualizar()"></select>
             </div>
             <table>
                 <thead>
@@ -58,31 +58,39 @@
     </div>
 
     <script>
-        // LINK DA PLANILHA DE RUPTURAS (O QUE VOCE ENVIOU SEXTA)
-        const URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTfJulxvGdrDMxqU1c3cDGeWJXnO09cYq4K-j7IUvJ65JRQCSty8sO4FJ0aRmwPegMCE0y6YYI9ASE7/pub?output=csv";
+        // LINK CORRETO DA PLANILHA DE RUPTURAS
+        const URL_RUPTURA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR1_E_y_NO2jbSL9UE_bzrqLO_kBmWvxi5VmkMDxWkhWPHIFATSXry3woXVRMLzI7QZLoso-RBUUvWv/pub?output=csv";
+        
         let globalData = [];
 
         async function load() {
             try {
-                const resp = await fetch(URL + "&t=" + new Date().getTime());
+                const resp = await fetch(URL_RUPTURA + "&cache=" + new Date().getTime());
                 const text = await resp.text();
                 const rows = text.split('\n').map(l => l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim()));
                 
-                // Mapeamento específico da sua planilha de Rupturas: Col 1:Loja, 2:Data, 3:Compras, 4:Itens, 5:Excluídos
+                // Mapeamento automático por nome de coluna para não pegar dado de navio
+                const header = rows[0].map(h => h.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+                const iLoja = header.findIndex(h => h.includes("loja"));
+                const iData = header.findIndex(h => h.includes("data"));
+                const iComp = header.findIndex(h => h.includes("compra") || h.includes("pedidos"));
+                const iIten = header.findIndex(h => h.includes("itens") || h.includes("total"));
+                const iExcl = header.findIndex(h => h.includes("exclui") || h.includes("ruptura"));
+
                 globalData = rows.slice(1).map(r => ({
-                    loja: r[1],
-                    data: r[2],
-                    compras: parseInt(r[3]) || 0,
-                    itens: parseInt(r[4]) || 0,
-                    excluidos: parseInt(r[5]) || 0
+                    loja: r[iLoja],
+                    data: r[iData],
+                    compras: parseInt(r[iComp]) || 0,
+                    itens: parseInt(r[iIten]) || 0,
+                    excluidos: parseInt(r[iExcl]) || 0
                 })).filter(i => i.loja && i.loja !== "LOJA");
 
                 const datas = [...new Set(globalData.map(i => i.data))].sort();
                 const sel = document.getElementById('dataFilter');
                 sel.innerHTML = '<option value="all">Visão Geral do Mês</option>';
-                datas.forEach(d => sel.innerHTML += `<option value="${d}">${d}</option>`);
+                datas.forEach(d => { if(d) sel.innerHTML += `<option value="${d}">${d}</option>`; });
                 atualizar();
-            } catch(e) { console.error("Erro ao carregar"); }
+            } catch(e) { console.error(e); }
         }
 
         function atualizar() {
@@ -97,14 +105,16 @@
 
             let lista = Object.keys(resumo).map(l => ({ name:l, ...resumo[l], p: (resumo[l].e/resumo[l].it)*100 || 0 })).sort((a,b)=>b.p - a.p);
             
-            const tIt = lista.reduce((a,b)=>a+b.it,0); const tE = lista.reduce((a,b)=>a+b.e,0);
+            const totalItens = lista.reduce((a,b)=>a+b.it,0);
+            const totalExcluidos = lista.reduce((a,b)=>a+b.e,0);
+
             document.getElementById('kpi-compras').innerText = lista.reduce((a,b)=>a+b.c,0).toLocaleString('pt-BR');
-            document.getElementById('kpi-itens').innerText = tIt.toLocaleString('pt-BR');
-            document.getElementById('kpi-excluidos').innerText = tE.toLocaleString('pt-BR');
-            document.getElementById('kpi-pct').innerText = ((tE/tIt)*100 || 0).toFixed(2) + "%";
+            document.getElementById('kpi-itens').innerText = totalItens.toLocaleString('pt-BR');
+            document.getElementById('kpi-excluidos').innerText = totalExcluidos.toLocaleString('pt-BR');
+            document.getElementById('kpi-pct').innerText = (totalItens > 0 ? (totalExcluidos/totalItens)*100 : 0).toFixed(2) + "%";
 
             document.getElementById('tabela-corpo').innerHTML = lista.map(i => `
-                <tr><td><strong>${i.name}</strong></td><td>${i.c}</td><td>${i.it}</td><td>${i.e}</td>
+                <tr><td><strong>${i.name}</strong></td><td>${i.c.toLocaleString('pt-BR')}</td><td>${i.it.toLocaleString('pt-BR')}</td><td>${i.e.toLocaleString('pt-BR')}</td>
                 <td><span class="badge-pct" style="background:${i.p>20?'#fee2e2':i.p>10?'#fef3c7':'#d1fae5'}; color:${i.p>20?'#991b1b':i.p>10?'#92400e':'#065f46'}">${i.p.toFixed(2)}%</span></td></tr>
             `).join('');
         }
