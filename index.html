@@ -51,7 +51,6 @@
             box-shadow: 0 0 10px var(--green);
             animation: pulse 2s infinite;
         }
-        .dot.error { background-color: #f85149; box-shadow: 0 0 10px #f85149; animation: none; }
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
@@ -154,7 +153,7 @@
             
             <div class="status-badges">
                 <div class="badge"><span id="status-dot" class="dot"></span> Sistema Online</div>
-                <div id="sync-badge" class="badge"><i class="fas fa-sync fa-spin"></i> Iniciando conexão...</div>
+                <div id="sync-badge" class="badge"><i class="fas fa-sync fa-spin"></i> Sincronizando...</div>
             </div>
         </header>
 
@@ -184,9 +183,7 @@
         <div class="table-container">
             <table id="data-table">
                 <thead><tr id="table-header"></tr></thead>
-                <tbody id="table-body">
-                    <tr><td colspan="10" style="text-align:center; padding: 50px;">Aguardando dados da planilha...</td></tr>
-                </tbody>
+                <tbody id="table-body"></tbody>
             </table>
         </div>
 
@@ -199,71 +196,79 @@
     </div>
 
     <script>
-        // LINK DA SUA PLANILHA
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT0KwpuVk1bxrb_DLjb9wVVnvLNzlYcZN-UWt7seAAzAjgyoF5Hmd9wzSeGFWgGWM11WTOf7LCpIf6b/pub?output=csv';
         
         let rawData = [];
-        let colLoja, colMes, colDia;
+        const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-        // Inicia o processo
         fetchData();
-        setInterval(fetchData, 60000); // Atualiza a cada 1 minuto
+        setInterval(fetchData, 60000);
 
         function fetchData() {
-            // Usando o download direto do PapaParse para evitar erros de CORS locais
             Papa.parse(SHEET_URL, {
                 download: true,
                 header: true,
                 dynamicTyping: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    if(results.data && results.data.length > 0) {
-                        rawData = results.data;
-                        document.getElementById('status-dot').className = 'dot';
-                        document.getElementById('sync-badge').innerHTML = `<i class="far fa-calendar-check"></i> Sincronizado: ${new Date().toLocaleTimeString()}`;
-                        
-                        detectColumns(Object.keys(rawData[0]));
+                    if(results.data.length > 0) {
+                        // Adiciona uma coluna virtual de "Mês Nome" baseada na coluna DATA
+                        rawData = results.data.map(row => {
+                            if(row.DATA) {
+                                const partes = row.DATA.split('/');
+                                if(partes.length >= 2) {
+                                    const mesIndex = parseInt(partes[1]) - 1;
+                                    row._mesNome = mesesNomes[mesIndex] || "Outros";
+                                }
+                            }
+                            return row;
+                        });
+
+                        document.getElementById('sync-badge').innerHTML = `<i class="far fa-clock"></i> Sincronizado: ${new Date().toLocaleTimeString()}`;
                         setupFilters();
                         applyFilters();
                     }
-                },
-                error: function(err) {
-                    console.error("Erro PapaParse:", err);
-                    document.getElementById('status-dot').className = 'dot error';
-                    document.getElementById('sync-badge').innerHTML = `<i class="fas fa-exclamation-triangle"></i> Erro ao conectar planilha`;
                 }
             });
         }
 
-        function detectColumns(headers) {
-            colLoja = headers.find(h => h.toLowerCase().includes('loja')) || headers[0];
-            colMes = headers.find(h => h.toLowerCase().includes('mês') || h.toLowerCase().includes('mes'));
-            colDia = headers.find(h => h.toLowerCase().includes('dia') || h.toLowerCase().includes('data'));
-        }
-
         function setupFilters() {
-            updateSelect('filter-mes', colMes);
-            updateSelect('filter-dia', colDia);
-            updateSelect('filter-loja', colLoja);
-        }
+            const selectMes = document.getElementById('filter-mes');
+            const selectDia = document.getElementById('filter-dia');
+            const selectLoja = document.getElementById('filter-loja');
 
-        function updateSelect(id, colName) {
-            const select = document.getElementById(id);
-            const currentVal = select.value;
-            
-            // Limpa mantendo o "Todos/Consolidado"
-            select.innerHTML = id === 'filter-mes' ? '<option value="all">Consolidado</option>' : 
-                              (id === 'filter-dia' ? '<option value="all">Todos os Dias</option>' : '<option value="all">Todas as Lojas</option>');
+            const mesAtual = selectMes.value;
+            const diaAtual = selectDia.value;
+            const lojaAtual = selectLoja.value;
 
-            if (!colName) return;
-
-            const uniqueValues = [...new Set(rawData.map(item => item[colName]).filter(v => v))];
-            uniqueValues.sort().forEach(val => {
+            // Preencher Meses (extraídos da coluna virtual _mesNome)
+            const mesesUnicos = [...new Set(rawData.map(r => r._mesNome))].filter(v => v);
+            selectMes.innerHTML = '<option value="all">Consolidado</option>';
+            mesesUnicos.forEach(m => {
                 const opt = document.createElement('option');
-                opt.value = val;
-                opt.textContent = val;
-                if (val == currentVal) opt.selected = true;
-                select.appendChild(opt);
+                opt.value = m; opt.textContent = m;
+                if(m === mesAtual) opt.selected = true;
+                selectMes.appendChild(opt);
+            });
+
+            // Preencher Dias
+            const diasUnicos = [...new Set(rawData.map(r => r.DATA))].filter(v => v).sort();
+            selectDia.innerHTML = '<option value="all">Todos os Dias</option>';
+            diasUnicos.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d; opt.textContent = d;
+                if(d === diaAtual) opt.selected = true;
+                selectDia.appendChild(opt);
+            });
+
+            // Preencher Lojas
+            const lojasUnicas = [...new Set(rawData.map(r => r.LOJA))].filter(v => v).sort();
+            selectLoja.innerHTML = '<option value="all">Todas as Lojas</option>';
+            lojasUnicas.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = l; opt.textContent = l;
+                if(l === lojaAtual) opt.selected = true;
+                selectLoja.appendChild(opt);
             });
         }
 
@@ -273,20 +278,13 @@
             const lojaVal = document.getElementById('filter-loja').value;
 
             const filtered = rawData.filter(row => {
-                const m = mesVal === 'all' || (colMes && row[colMes] == mesVal);
-                const d = diaVal === 'all' || (colDia && row[colDia] == diaVal);
-                const l = lojaVal === 'all' || row[colLoja] == lojaVal;
+                const m = mesVal === 'all' || row._mesNome === mesVal;
+                const d = diaVal === 'all' || row.DATA === diaVal;
+                const l = lojaVal === 'all' || row.LOJA === lojaVal;
                 return m && d && l;
             });
 
             renderDashboard(filtered);
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-mes').value = 'all';
-            document.getElementById('filter-dia').value = 'all';
-            document.getElementById('filter-loja').value = 'all';
-            applyFilters();
         }
 
         function renderDashboard(data) {
@@ -295,28 +293,28 @@
             const rankingBox = document.getElementById('ranking-box');
 
             if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="15" style="text-align:center; padding: 30px;">Nenhum dado encontrado para os filtros selecionados.</td></tr>';
-                rankingBox.innerHTML = '';
+                tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 30px;">Sem dados.</td></tr>';
                 return;
             }
 
-            const headers = Object.keys(data[0]);
+            // Cabeçalho (removemos a coluna virtual _mesNome da exibição)
+            const headers = Object.keys(data[0]).filter(h => h !== '_mesNome');
             tableHeader.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
 
-            // Lógica do Ranking (Top 3)
-            const metricHeader = headers.find(h => h.includes('%')) || headers[1];
-            const sorted = [...data].sort((a, b) => (parseFloat(b[metricHeader]) || 0) - (parseFloat(a[metricHeader]) || 0)).slice(0, 3);
-            
+            // Ranking
+            const metricKey = headers.find(h => h.includes('%')) || headers[headers.length-1];
+            const sorted = [...data].sort((a, b) => (parseFloat(b[metricKey]) || 0) - (parseFloat(a[metricKey]) || 0)).slice(0, 3);
             const medals = ['🥇 1º LUGAR', '🥈 2º LUGAR', '🥉 3º LUGAR'];
+            
             rankingBox.innerHTML = sorted.map((item, i) => `
                 <div class="rank-card">
                     <h4>${medals[i]}</h4>
-                    <span class="rank-loja">${item[colLoja] || '---'}</span>
-                    <div class="rank-val">${item[metricHeader]}${typeof item[metricHeader] === 'number' ? '%' : ''}</div>
+                    <span class="rank-loja">${item.LOJA}</span>
+                    <div class="rank-val">${item[metricKey]}${typeof item[metricKey] === 'number' ? '%' : ''}</div>
                 </div>
             `).join('');
 
-            // Preenche Tabela
+            // Tabela
             tableBody.innerHTML = data.map(row => `
                 <tr>
                     ${headers.map(h => {
@@ -334,10 +332,17 @@
             `).join('');
         }
 
+        function resetFilters() {
+            document.getElementById('filter-mes').value = 'all';
+            document.getElementById('filter-dia').value = 'all';
+            document.getElementById('filter-loja').value = 'all';
+            applyFilters();
+        }
+
         function exportExcel() {
             const table = document.getElementById("data-table");
             const wb = XLSX.utils.table_to_book(table);
-            XLSX.writeFile(wb, "Relatorio_Hub_Pinheiro.xlsx");
+            XLSX.writeFile(wb, "Relatorio_Pinheiro.xlsx");
         }
     </script>
 </body>
