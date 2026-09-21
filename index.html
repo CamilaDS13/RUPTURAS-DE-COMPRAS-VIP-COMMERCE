@@ -1,303 +1,226 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hub de Dados Pinheiro - Ruptura</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --text-main: #ffffff;
-            --text-dim: #8b949e;
-            --green: #238636;
-            --blue: #58a6ff;
-            --border: #30363d;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container { max-width: 1400px; margin: 0 auto; }
-        header { margin-bottom: 25px; }
-        .sub-header { color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; }
-        h1 { font-size: 2.2rem; margin: 5px 0 15px 0; font-weight: 800; }
-
-        .status-badges { display: flex; gap: 10px; margin-bottom: 20px; }
-        .badge {
-            background: #21262d;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid var(--border);
-        }
-        .dot { height: 10px; width: 10px; border-radius: 50%; background-color: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        .filter-bar {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: flex-end;
-            margin-bottom: 25px;
-        }
-
-        .filter-group { display: flex; flex-direction: column; gap: 8px; }
-        .filter-group label { font-size: 0.7rem; color: var(--text-dim); font-weight: bold; text-transform: uppercase; }
-        
-        select {
-            background: #0d1117;
-            color: white;
-            border: 1px solid var(--border);
-            padding: 10px 15px;
-            border-radius: 8px;
-            min-width: 160px;
-            cursor: pointer;
-            outline: none;
-        }
-
-        .btn-reset { background: #21262d; color: white; border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
-        .btn-export { background: var(--green); color: white; border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-left: auto; display: flex; align-items: center; gap: 8px; }
-
-        .ranking-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
-        .rank-card { background: linear-gradient(145deg, #1e1b4b, #0d1117); padding: 20px; border-radius: 15px; border: 1px solid var(--border); text-align: center; }
-        .rank-card h4 { margin: 0 0 10px 0; color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; }
-        .rank-loja { font-size: 1.1rem; font-weight: bold; display: block; margin-bottom: 5px; }
-        .rank-val { font-size: 2rem; font-weight: 800; color: var(--blue); }
-
-        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { text-align: left; padding: 15px; color: var(--text-dim); border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
-        td { padding: 15px; border-bottom: 1px solid #21262d; font-size: 0.9rem; }
-
-        .perf-red { color: #f85149; font-weight: bold; }
-        .perf-green { color: #3fb950; font-weight: bold; }
-
-        .legend { margin-top: 20px; display: flex; gap: 20px; font-size: 0.8rem; color: var(--text-dim); background: #161b22; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
-        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Rupturas</title>
+  <meta name="description" content="Painel analítico de rupturas, compras, itens e exclusões por loja e data, com sincronização Google Drive e exportação de planilhas.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
 </head>
-<body>
+<body class="bg-slate-50/90 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <div class="container">
-        <header>
-            <div class="sub-header">Central de Inteligência Operacional</div>
-            <h1>HUB DE DADOS PINHEIRO</h1>
-            <div class="status-badges">
-                <div class="badge"><span class="dot"></span> Sistema Online</div>
-                <div id="sync-badge" class="badge"><i class="fas fa-sync fa-spin"></i> Sincronizando...</div>
-            </div>
-        </header>
+  <!-- Cabeçalho -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
+          PR
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Painel de Rupturas</h1>
+            <span id="syncBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              ● Base Ativa
+            </span>
+          </div>
+          <p id="lastSyncText" class="text-xs text-slate-500 font-medium">Sincronização Google Drive & Análise Operacional</p>
+        </div>
+      </div>
 
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label>Mês</label>
-                <!-- Mudança aqui: quando o mês muda, ele reconstrói o filtro de DIA -->
-                <select id="filter-mes" onchange="updateDiaFilter(); applyFilters();"><option value="all">Consolidado</option></select>
-            </div>
-            <div class="filter-group">
-                <label>Dia</label>
-                <select id="filter-dia" onchange="applyFilters()"><option value="all">Todos os Dias</option></select>
-            </div>
-            <div class="filter-group">
-                <label>Loja</label>
-                <select id="filter-loja" onchange="applyFilters()"><option value="all">Todas as Lojas</option></select>
-            </div>
-            <button class="btn-reset" onclick="resetFilters()">Limpar Filtros</button>
-            <button class="btn-export" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <button id="btnOpenSync" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-xs">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+          <span>Sincronizar Google Drive</span>
+        </button>
+
+        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer transition-colors shadow-xs">
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span>Subir CSV</span>
+          <input type="file" id="fileInput" accept=".csv,.txt" class="hidden">
+        </label>
+
+        <button id="btnExportTop" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-extrabold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span>Exportar Planilha</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Barra de Filtros -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Selecionar por Loja</label>
+          <select id="selectLoja" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500">
+            <option value="TODAS">TODAS AS LOJAS (CONSOLIDADO)</option>
+          </select>
         </div>
 
-        <div id="ranking-box" class="ranking-container"></div>
-
-        <div class="table-container">
-            <table id="data-table">
-                <thead><tr id="table-header"></tr></thead>
-                <tbody id="table-body"></tbody>
-            </table>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Data Início</label>
+          <input type="date" id="inputDataInicio" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
         </div>
 
-        <div class="legend">
-            <span><strong>PERFORMANCE:</strong></span>
-            <span><span class="status-dot" style="background: var(--green);"></span> Baixa Ruptura</span>
-            <span><span class="status-dot" style="background: var(--red);"></span> Alta Ruptura (> 10%)</span>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Data Fim</label>
+          <input type="date" id="inputDataFim" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
         </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Buscar</label>
+          <div class="relative">
+            <input type="text" id="inputBusca" placeholder="Filtrar por loja ou número..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800">
+            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+        <span id="filteredCountText" class="text-slate-500 font-medium">Carregando dados...</span>
+        <button id="btnClearFilters" class="text-blue-600 font-bold hover:underline">Limpar Filtros</button>
+      </div>
     </div>
 
-    <script>
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT0KwpuVk1bxrb_DLjb9wVVnvLNzlYcZN-UWt7seAAzAjgyoF5Hmd9wzSeGFWgGWM11WTOf7LCpIf6b/pub?output=csv';
-        let rawData = [];
-        const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    <!-- Card Geral de Destaque -->
+    <div class="bg-white rounded-2xl border-2 border-blue-600/30 p-6 shadow-sm relative overflow-hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-md bg-blue-600 text-white font-black text-xs uppercase tracking-wider">Card Geral</span>
+            <h2 id="generalCardTitle" class="text-lg font-black text-slate-900">Visão Geral Consolidada</h2>
+          </div>
+          <p id="generalCardSubtitle" class="text-xs text-slate-500 mt-1">Consolidado das operações de compras e índice de rupturas</p>
+        </div>
+        <div id="generalExclusionBadge" class="self-start md:self-auto px-4 py-2 rounded-xl text-center font-black">
+        </div>
+      </div>
 
-        fetchData();
-        setInterval(fetchData, 60000);
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Qtd Compra</span>
+          <span id="metricQtdCompra" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
+          <span class="text-[10px] text-slate-400 mt-0.5 block">Transações registradas</span>
+        </div>
 
-        function fetchData() {
-            Papa.parse(SHEET_URL, {
-                download: true,
-                header: true,
-                dynamicTyping: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if(results.data.length > 0) {
-                        rawData = results.data.map(row => {
-                            if(row.DATA) {
-                                const partes = row.DATA.split('/');
-                                if(partes.length >= 2) {
-                                    const mesIndex = parseInt(partes[1]) - 1;
-                                    row._mesNome = mesesNomes[mesIndex] || "Outros";
-                                }
-                            }
-                            return row;
-                        });
-                        document.getElementById('sync-badge').innerHTML = `<i class="far fa-clock"></i> Sincronizado: ${new Date().toLocaleTimeString()}`;
-                        
-                        setupInitialFilters(); // Preenche Mês e Loja uma única vez
-                        updateDiaFilter();    // Preenche Dia com base no Mês atual
-                        applyFilters();
-                    }
-                }
-            });
-        }
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total de Itens</span>
+          <span id="metricTotalItens" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
+          <span class="text-[10px] text-slate-400 mt-0.5 block">Volume processado</span>
+        </div>
 
-        function setupInitialFilters() {
-            const selectMes = document.getElementById('filter-mes');
-            const selectLoja = document.getElementById('filter-loja');
+        <div class="p-4 rounded-xl bg-rose-50/50 border border-rose-200">
+          <span class="text-[11px] font-bold text-rose-700 uppercase tracking-wider block">Itens Excluídos</span>
+          <span id="metricItensExcluidos" class="text-2xl font-black text-rose-600 mt-1 block">0</span>
+          <span class="text-[10px] text-rose-500 mt-0.5 block">Ruptura / descarte</span>
+        </div>
 
-            if (selectMes.options.length > 1) return; // Evita duplicar se já preenchido
+        <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200">
+          <span class="text-[11px] font-bold text-blue-800 uppercase tracking-wider block">Taxa de Exclusão %</span>
+          <span id="metricTaxaExclusao" class="text-2xl font-black text-blue-700 mt-1 block">0,00%</span>
+          <span class="text-[10px] text-blue-600 mt-0.5 block">Proporção descartada</span>
+        </div>
+      </div>
+    </div>
 
-            // Preencher Mês
-            const mesesUnicos = [...new Set(rawData.map(r => r._mesNome))].filter(v => v);
-            mesesUnicos.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m; opt.textContent = m;
-                selectMes.appendChild(opt);
-            });
+    <!-- Destaque por Loja (Cards com Bordas e Opção Escuro) -->
+    <div class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Destaque por Loja</h3>
+          <p class="text-xs text-slate-500">Clique em qualquer loja para filtrar a análise</p>
+        </div>
 
-            // Preencher Loja
-            const lojasUnicas = [...new Set(rawData.map(r => r.LOJA))].filter(v => v).sort();
-            lojasUnicas.forEach(l => {
-                const opt = document.createElement('option');
-                opt.value = l; opt.textContent = l;
-                selectLoja.appendChild(opt);
-            });
-        }
+        <!-- Seletor de Tema dos Cards de Loja -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold">
+            <button id="themeLightBtn" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold transition-all">
+              Suave / Borda Fina
+            </button>
+            <button id="themeDarkBtn" class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 font-semibold transition-all">
+              Mais Escuro
+            </button>
+          </div>
 
-        // NOVA FUNÇÃO: Atualiza os dias com base no mês selecionado
-        function updateDiaFilter() {
-            const mesSelecionado = document.getElementById('filter-mes').value;
-            const selectDia = document.getElementById('filter-dia');
-            
-            // Salva o dia atual para tentar manter a seleção se possível
-            const diaAtual = selectDia.value;
-            
-            // Limpa o select de dias
-            selectDia.innerHTML = '<option value="all">Todos os Dias</option>';
+          <select id="sortStoresSelect" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-700">
+            <option value="itens_desc">Volume Itens (Maior)</option>
+            <option value="pct_desc">Taxa Exclusão % (Maior)</option>
+            <option value="pct_asc">Taxa Exclusão % (Menor)</option>
+            <option value="compras_desc">Qtd Compra (Maior)</option>
+          </select>
+        </div>
+      </div>
 
-            // Filtra os dados pelo mês para pegar apenas as datas daquele mês
-            const dadosDoMes = mesSelecionado === 'all' 
-                ? rawData 
-                : rawData.filter(r => r._mesNome === mesSelecionado);
+      <!-- Grade de Cards de Loja -->
+      <div id="storesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    </div>
 
-            // Pega datas únicas e ordena (como texto DD/MM/AAAA)
-            const diasUnicos = [...new Set(dadosDoMes.map(r => r.DATA))].filter(v => v).sort((a,b) => {
-                // Ordenação lógica por data (transforma DD/MM em MM/DD para o sort)
-                const aP = a.split('/'); const bP = b.split('/');
-                return new Date(aP[2], aP[1], aP[0]) - new Date(bP[2], bP[1], bP[0]);
-            });
+    <!-- Tabela Detalhada -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Detalhamento dos Dados</h3>
+          <p class="text-xs text-slate-500">Histórico completo de compras e exclusões</p>
+        </div>
+        <button id="btnExportBottom" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Exportar Planilha Excel/CSV
+        </button>
+      </div>
 
-            diasUnicos.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d; opt.textContent = d;
-                if(d === diaAtual) opt.selected = true;
-                selectDia.appendChild(opt);
-            });
-        }
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-50/80 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px] text-slate-500">
+            <tr>
+              <th class="py-3 px-4">Data</th>
+              <th class="py-3 px-4">Loja</th>
+              <th class="py-3 px-4 text-right">Qtd Compra</th>
+              <th class="py-3 px-4 text-right">Total Itens</th>
+              <th class="py-3 px-4 text-right">Itens Excluídos</th>
+              <th class="py-3 px-4 text-right">Taxa %</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+          <tfoot id="tableFoot" class="bg-slate-50 border-t-2 border-slate-200 font-bold text-slate-800"></tfoot>
+        </table>
+      </div>
 
-        function applyFilters() {
-            const mesVal = document.getElementById('filter-mes').value;
-            const diaVal = document.getElementById('filter-dia').value;
-            const lojaVal = document.getElementById('filter-loja').value;
+      <div id="paginationBar" class="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-600"></div>
+    </div>
+  </main>
 
-            const filtered = rawData.filter(row => {
-                const m = mesVal === 'all' || row._mesNome === mesVal;
-                const d = diaVal === 'all' || row.DATA === diaVal;
-                const l = lojaVal === 'all' || row.LOJA === lojaVal;
-                return m && d && l;
-            });
+  <!-- Modal Google Drive -->
+  <div id="syncModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900">Sincronização Google Drive</h3>
+        <button id="btnCloseModal" class="p-1 text-slate-400 hover:text-slate-700">✕</button>
+      </div>
+      <div class="mt-4 space-y-3 text-xs">
+        <label class="block font-bold text-slate-700">Link do Google Drive ou Sheets</label>
+        <input type="url" id="inputDriveUrl" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono">
+      </div>
+      <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+        <button id="btnResetData" class="text-slate-500 hover:text-rose-600 font-bold text-xs">Restaurar Padrão</button>
+        <div class="flex gap-2">
+          <button id="btnCancelModal" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs">Cancelar</button>
+          <button id="btnConfirmSync" class="px-4 py-1.5 rounded-lg bg-blue-600 text-white font-bold text-xs">Sincronizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            renderDashboard(filtered);
-        }
-
-        function renderDashboard(data) {
-            const tableHeader = document.getElementById('table-header');
-            const tableBody = document.getElementById('table-body');
-            const rankingBox = document.getElementById('ranking-box');
-
-            if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 30px;">Sem dados para este período.</td></tr>';
-                rankingBox.innerHTML = '';
-                return;
-            }
-
-            const headers = Object.keys(data[0]).filter(h => h !== '_mesNome');
-            tableHeader.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
-
-            // Ranking
-            const metricKey = headers.find(h => h.includes('%')) || headers[headers.length-1];
-            const sorted = [...data].sort((a, b) => (parseFloat(b[metricKey]) || 0) - (parseFloat(a[metricKey]) || 0)).slice(0, 3);
-            const medals = ['🥇 1º LUGAR', '🥈 2º LUGAR', '🥉 3º LUGAR'];
-            
-            rankingBox.innerHTML = sorted.map((item, i) => `
-                <div class="rank-card">
-                    <h4>${medals[i]}</h4>
-                    <span class="rank-loja">${item.LOJA || '---'}</span>
-                    <div class="rank-val">${item[metricKey]}${typeof item[metricKey] === 'number' ? '%' : ''}</div>
-                </div>
-            `).join('');
-
-            // Tabela
-            tableBody.innerHTML = data.map(row => `
-                <tr>
-                    ${headers.map(h => {
-                        let val = row[h];
-                        let cls = '';
-                        if (typeof val === 'number' && h.includes('%')) {
-                            cls = val > 10 ? 'perf-red' : 'perf-green';
-                            val = val.toFixed(1) + '%';
-                        }
-                        return `<td class="${cls}">${val ?? '-'}</td>`;
-                    }).join('')}
-                </tr>
-            `).join('');
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-mes').value = 'all';
-            updateDiaFilter(); // Reseta os dias para todos
-            document.getElementById('filter-loja').value = 'all';
-            applyFilters();
-        }
-
-        function exportExcel() {
-            const table = document.getElementById("data-table");
-            const wb = XLSX.utils.table_to_book(table);
-            XLSX.writeFile(wb, "Relatorio_Ruptura_Pinheiro.xlsx");
-        }
-    </script>
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    <p>Painel de Rupturas • Sincronização Google Drive & Análise Operacional</p>
+  </footer>
 </body>
 </html>
