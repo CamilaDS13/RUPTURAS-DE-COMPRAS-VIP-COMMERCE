@@ -1,296 +1,749 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <title>Cookie check</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        color-scheme: light dark;
-      }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Rupturas</title>
+  <meta name="description" content="Painel analítico de rupturas, compras, itens e exclusões por loja e data, sincronizado com o Google Drive.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-      body {
-        font-family: 'Inter', Helvetica, Arial, sans-serif;
-        background: light-dark(#F8F8F7, #191919);
-        color: light-dark(#1f1f1f, #e3e3e3);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        text-align: center;
-      }
-
-      .container {
-        background: light-dark(#FFFFFF, #1F1F1F);
-        padding: 32px;
-        border-radius: 16px;
-        border: 1px solid light-dark(#E2E3E4, #3E3E3E);
-        max-width: min(80%, 500px);
-        width: 100%;
-        color: light-dark(#2B2D31, #D4D4D4);
-      }
-
-      h1 {
-        font-size: 20px;
-        font-weight: 500;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        color: light-dark(#2B2D31, #D4D4D4);
-      }
-
-      p {
-        font-size: 14px;
-        color: light-dark(#2B2D31, #D4D4D4);
-        line-height: 21px;
-        margin: 0 0 1.5rem 0;
-      }
-
-      .icon {
-        margin-bottom: 1rem;
-        line-height: 0;
-      }
-
-      .button-container {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 2rem;
-      }
-
-      button {
-        background-color: light-dark(#fff, #323232);
-        color: light-dark(#2B2D31, #FCFCFC);
-        border: 1px solid light-dark(#E2E3E4, #3E3E3E);
-        border-radius: 12px;
-        padding: 8px 12px;
-        font-size: 14px;
-        line-height: 21px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        font-weight: 400;
-        font-family: 'Inter', Helvetica, Arial, sans-serif;
-        width: 100%;
-      }
-
-      button:hover {
-        background-color: light-dark(#EAEAEB, #424242);
-      }
-
-      .hidden {
-        display: none;
-      }
-
-      /* Loading Spinner Animation */
-      .spinner {
-        margin: 0 auto 1.5rem auto;
-        width: 40px;
-        height: 40px;
-        border: 4px solid light-dark(#f0f0f0, #262626);
-        border-top: 4px solid light-dark(#076eff, #87a9ff); /* Blue color */
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      .logo {
-        border-radius: 10px;
-        display: block;
-        margin: 0 auto 2rem auto;
-      }
-
-      .logo.hidden {
-        display: none;
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <img
-        class="logo"
-        src="https://www.gstatic.com/images/branding/productlogos/ai_studio/v1/web-512dp/logo_ai_studio_color_1x_web_512dp.png"
-        alt="AI Studio Logo"
-        width="256"
-        height="256"
-      />
-      <div class="spinner"></div>
-      <div id="error-ui" class="hidden">
-        <div class="icon">
-          <svg
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="48px"
-            height="48px"
-            fill="#D73A49"
-          >
-            <path
-              d="M12,2C6.486,2,2,6.486,2,12s4.486,10,10,10s10-4.486,10-10S17.514,2,12,2z M13,17h-2v-2h2V17z M13,13h-2V7h2V13z"
-            />
-          </svg>
+  <!-- Cabeçalho -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
+          PR
         </div>
-        <div id="stepOne" class="text-container">
-          <h1>Action required to load your app</h1>
-          <p>
-            It looks like your browser is blocking a required security cookie, which is common on
-            older versions of iOS and Safari.
-          </p>
-          <div class="button-container">
-            <button id="authInSeparateWindowButton" onclick="redirectToReturnUrl(true)">Authenticate in new window</button>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Painel de Rupturas</h1>
+            <span id="syncBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              ● Google Drive Conectado ao Vivo
+            </span>
           </div>
+          <p id="lastSyncText" class="text-xs text-slate-500 font-medium">Sincronizado com Google Drive & Análise Operacional</p>
         </div>
-        <div id="stepTwo" class="text-container hidden">
-          <h1>Action required to load your app</h1>
-          <p>
-            It looks like your browser is blocking a required security cookie, which is common on
-            older versions of iOS and Safari.
-          </p>
-          <div class="button-container">
-            <button id="interactButton" onclick="redirectToReturnUrl(false)">Close and continue</button>
-          </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <a id="linkDriveSheet" href="https://docs.google.com/spreadsheets/d/1Lg5cpZZKWe1TYn5wbkGIuEMVSaBVLcWnll91DEj54xg/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors shadow-xs">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          <span>Abrir Planilha no Drive</span>
+        </a>
+
+        <button id="btnOpenSync" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-xs">
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span id="btnSyncLabel">Atualizar do Drive</span>
+        </button>
+
+        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer transition-colors shadow-xs">
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <span>Subir CSV</span>
+          <input type="file" id="fileInput" accept=".csv,.txt" class="hidden">
+        </label>
+
+        <button id="btnExportTop" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-extrabold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span>Exportar Planilha</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Barra de Filtros -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Selecionar Loja</label>
+          <select id="selectLoja" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500">
+            <option value="TODAS">TODAS AS LOJAS (CONSOLIDADO)</option>
+          </select>
         </div>
-        <div id="stepThree" class="text-container hidden">
-          <h1>Almost there!</h1>
-          <p>
-            Grant permission for the required security cookie below.
-          </p>
-          <div class="button-container">
-            <button id="grantPermissionButton" onclick="grantStorageAccess()">Grant permission</button>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Data Início</label>
+          <input type="date" id="inputDataInicio" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Data Fim</label>
+          <input type="date" id="inputDataFim" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Buscar</label>
+          <div class="relative">
+            <input type="text" id="inputBusca" placeholder="Filtrar loja ou data..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800">
+            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
         </div>
       </div>
+
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+        <span id="filteredCountText" class="text-slate-500 font-medium">Carregando dados...</span>
+        <button id="btnClearFilters" class="text-blue-600 font-bold hover:underline">Limpar Filtros</button>
+      </div>
     </div>
-    <script>
-      const AUTH_FLOW_TEST_COOKIE_NAME = '__SECURE-aistudio_auth_flow_may_set_cookies';
-      const COOKIE_VALUE = 'true';
 
-      function getCookie(name) {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          let cookie = cookies[i].trim();
-          if (cookie.startsWith(name + '=')) {
-            return cookie.substring(name.length + 1);
+    <!-- Card Geral de Destaque -->
+    <div class="bg-white rounded-2xl border-2 border-blue-600/30 p-6 shadow-sm relative overflow-hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-md bg-blue-600 text-white font-black text-xs uppercase tracking-wider">Card Geral</span>
+            <h2 id="generalCardTitle" class="text-lg font-black text-slate-900">Visão Geral Consolidada</h2>
+          </div>
+          <p id="generalCardSubtitle" class="text-xs text-slate-500 mt-1">Consolidado das operações de compras e índice de rupturas</p>
+        </div>
+        <div id="generalExclusionBadge" class="self-start md:self-auto px-4 py-2 rounded-xl text-center font-black">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Qtd Compra</span>
+          <span id="metricQtdCompra" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
+          <span class="text-[10px] text-slate-400 mt-0.5 block">Transações registradas</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total de Itens</span>
+          <span id="metricTotalItens" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
+          <span class="text-[10px] text-slate-400 mt-0.5 block">Volume processado</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-rose-50/50 border border-rose-200">
+          <span class="text-[11px] font-bold text-rose-700 uppercase tracking-wider block">Itens Excluídos</span>
+          <span id="metricItensExcluidos" class="text-2xl font-black text-rose-600 mt-1 block">0</span>
+          <span class="text-[10px] text-rose-500 mt-0.5 block">Ruptura / descarte</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200">
+          <span class="text-[11px] font-bold text-blue-800 uppercase tracking-wider block">Taxa de Exclusão %</span>
+          <span id="metricTaxaExclusao" class="text-2xl font-black text-blue-700 mt-1 block">0,00%</span>
+          <span class="text-[10px] text-blue-600 mt-0.5 block">Proporção descartada</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos Analíticos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <h3 class="text-sm font-bold text-slate-900 mb-1">Evolução Diária da Taxa de Exclusão (%)</h3>
+        <p class="text-xs text-slate-400 mb-4">Tendência diária de rupturas no período selecionado</p>
+        <div class="h-64 relative">
+          <canvas id="chartEvolution"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <h3 class="text-sm font-bold text-slate-900 mb-1">Ranking de Taxa de Exclusão por Loja (%)</h3>
+        <p class="text-xs text-slate-400 mb-4">Comparativo direto de descarte entre as unidades</p>
+        <div class="h-64 relative">
+          <canvas id="chartStores"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Destaque por Loja -->
+    <div class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Destaque por Loja</h3>
+          <p class="text-xs text-slate-500">Clique em qualquer loja para filtrar a análise</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold">
+            <button id="themeLightBtn" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold transition-all">
+              Suave / Borda Fina
+            </button>
+            <button id="themeDarkBtn" class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 font-semibold transition-all">
+              Mais Escuro
+            </button>
+          </div>
+
+          <select id="sortStoresSelect" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-700">
+            <option value="itens_desc">Volume Itens (Maior)</option>
+            <option value="pct_desc">Taxa Exclusão % (Maior)</option>
+            <option value="pct_asc">Taxa Exclusão % (Menor)</option>
+            <option value="compras_desc">Qtd Compra (Maior)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="storesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      </div>
+    </div>
+
+    <!-- Tabela Detalhada -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Detalhamento dos Dados</h3>
+          <p class="text-xs text-slate-500">Histórico completo de compras e exclusões</p>
+        </div>
+        <button id="btnExportBottom" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Exportar Planilha Excel/CSV
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-700">
+          <thead class="bg-slate-50/80 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px] text-slate-500">
+            <tr>
+              <th class="py-3 px-4">Data</th>
+              <th class="py-3 px-4">Loja</th>
+              <th class="py-3 px-4 text-right">Qtd Compra</th>
+              <th class="py-3 px-4 text-right">Total Itens</th>
+              <th class="py-3 px-4 text-right">Itens Excluídos</th>
+              <th class="py-3 px-4 text-right">Taxa %</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100">
+          </tbody>
+          <tfoot id="tableFoot" class="bg-slate-50 border-t-2 border-slate-200 font-bold text-slate-800">
+          </tfoot>
+        </table>
+      </div>
+
+      <div id="paginationBar" class="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-600">
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    <p>Painel de Rupturas • Sincronização Google Drive & Análise Operacional</p>
+  </footer>
+
+  <script>
+    const LIVE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT0KwpuVk1bxrb_DLjb9wVVnvLNzlYcZN-UWt7seAAzAjgyoF5Hmd9wzSeGFWgGWM11WTOf7LCpIf6b/pub?output=csv';
+
+    let rawData = [];
+    let currentStore = 'TODAS';
+    let cardTheme = 'refined_slate';
+    let currentPage = 1;
+    const pageSize = 20;
+
+    let chartEvolutionInstance = null;
+    let chartStoresInstance = null;
+
+    function parseCSV(text) {
+      if (!text) return [];
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length < 2) return [];
+      const items = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const parts = line.split(',');
+        if (parts.length >= 6) {
+          const data = parts[0].trim();
+          const loja = parts[1].trim();
+          const qtdCompra = parseInt(parts[2].trim(), 10) || 0;
+          const totalItens = parseInt(parts[3].trim(), 10) || 0;
+          const itensExcluidos = parseInt(parts[4].trim(), 10) || 0;
+          const pct = parseFloat(parts[5].trim()) || 0;
+
+          let isoDate = '';
+          const dp = data.split('/');
+          if (dp.length === 3) {
+            isoDate = `${dp[2]}-${dp[1].padStart(2, '0')}-${dp[0].padStart(2, '0')}`;
+          }
+
+          items.push({
+            id: 'item-' + i,
+            data,
+            isoDate,
+            loja,
+            qtdCompra,
+            totalItens,
+            itensExcluidos,
+            itensExcluidosPct: pct
+          });
+        }
+      }
+      return items;
+    }
+
+    function formatNumber(num) {
+      return new Intl.NumberFormat('pt-BR').format(num || 0);
+    }
+
+    async function init() {
+      // 1. Tenta pegar do cache local se existir
+      try {
+        const saved = localStorage.getItem('painel_rupturas_data');
+        if (saved) rawData = JSON.parse(saved);
+      } catch (e) {}
+
+      // 2. Busca da planilha do Google Drive em tempo real
+      await tryAutoSyncFromDrive(false);
+
+      setupStoresDropdown();
+      setupDateRange();
+      attachEvents();
+      renderAll();
+
+      // 3. Atualiza em segundo plano a cada 60 segundos
+      setInterval(() => {
+        tryAutoSyncFromDrive(true);
+      }, 60000);
+    }
+
+    async function tryAutoSyncFromDrive(silent = false) {
+      try {
+        if (!silent) {
+          const btnLabel = document.getElementById('btnSyncLabel');
+          if (btnLabel) btnLabel.textContent = 'Buscando...';
+        }
+
+        const res = await fetch(LIVE_SHEET_URL + '&t=' + Date.now());
+        if (res.ok) {
+          const text = await res.text();
+          const parsed = parseCSV(text);
+          if (parsed && parsed.length > 0) {
+            rawData = parsed;
+            try { localStorage.setItem('painel_rupturas_data', JSON.stringify(parsed)); } catch (e) {}
+            document.getElementById('syncBadge').textContent = '● Conectado ao Vivo com a Planilha';
+            document.getElementById('lastSyncText').textContent = 'Última sincronização com Google Drive às ' + new Date().toLocaleTimeString('pt-BR');
+            setupStoresDropdown();
+            setupDateRange();
+            renderAll();
           }
         }
-        return null;
+      } catch (err) {
+        console.warn('Usando base local em cache:', err);
+      } finally {
+        const btnLabel = document.getElementById('btnSyncLabel');
+        if (btnLabel) btnLabel.textContent = 'Atualizar do Drive';
       }
+    }
 
-      function setAuthFlowTestCookie() {
-        // Set the cookie's TTL to 1 minute. This is a short lived cookie because it is only used
-        // when the user does not have an auth token or their auth token needs to be reset.
-        // Making this cookie too long-lived allows the user to get into a state where they can't
-        // mint a new auth token.
-        document.cookie = `${AUTH_FLOW_TEST_COOKIE_NAME}=${COOKIE_VALUE}; Path=/; Secure; SameSite=None; Domain=${window.location.hostname}; Partitioned; Max-Age=60;`;
+    function setupStoresDropdown() {
+      const select = document.getElementById('selectLoja');
+      const cur = select.value;
+      select.innerHTML = '<option value="TODAS">TODAS AS LOJAS (CONSOLIDADO)</option>';
+      const stores = Array.from(new Set(rawData.map(d => d.loja))).filter(Boolean).sort();
+      stores.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s;
+        select.appendChild(opt);
+      });
+      if (stores.includes(cur)) select.value = cur;
+    }
+
+    function setupDateRange() {
+      const dates = rawData.map(d => d.isoDate).filter(Boolean).sort();
+      if (dates.length > 0) {
+        document.getElementById('inputDataInicio').min = dates[0];
+        document.getElementById('inputDataInicio').max = dates[dates.length - 1];
+        document.getElementById('inputDataFim').min = dates[0];
+        document.getElementById('inputDataFim').max = dates[dates.length - 1];
       }
+    }
 
-      /**
-       * Returns true if the test cookie is set, false otherwise.
-       */
-      function authFlowTestCookieIsSet() {
-        return getCookie(AUTH_FLOW_TEST_COOKIE_NAME) === COOKIE_VALUE;
-      }
+    function getFilteredData() {
+      const loja = document.getElementById('selectLoja').value;
+      const dataInicio = document.getElementById('inputDataInicio').value;
+      const dataFim = document.getElementById('inputDataFim').value;
+      const busca = document.getElementById('inputBusca').value.toLowerCase().trim();
 
-      /**
-       * Redirects to the return url. If autoClose is true, then the return url will be opened in a
-       * new window, and it will be closed automatically when the page loads.
-       * Options:
-       *   storageAccessGranted: if true, appends __storage_access_granted=1 to
-       *   the return url so the Lua auth script can set the test cookie
-       *   server-side (needed for Safari/iOS where document.cookie is blocked).
-       */
-      async function redirectToReturnUrl(autoClose, storageAccessGranted = false) {
-        const initialReturnUrlStr = new URLSearchParams(window.location.search).get('return_url');
-        const returnUrl = initialReturnUrlStr ? new URL(initialReturnUrlStr) : null;
-
-        // Prevent potentially malicious URLs from being used
-        if (returnUrl.protocol.toLowerCase() === 'javascript:') {
-          console.error('Potentially malicious return URL blocked');
-          return;
+      return rawData.filter(d => {
+        if (loja !== 'TODAS' && d.loja !== loja) return false;
+        if (dataInicio && d.isoDate < dataInicio) return false;
+        if (dataFim && d.isoDate > dataFim) return false;
+        if (busca) {
+          const matchLoja = d.loja.toLowerCase().includes(busca);
+          const matchData = d.data.includes(busca);
+          if (!matchLoja && !matchData) return false;
         }
+        return true;
+      });
+    }
 
-        if (storageAccessGranted) {
-          returnUrl.searchParams.set('__storage_access_granted', '1');
+    function renderAll() {
+      const filtered = getFilteredData();
+      renderOverviewCard(filtered);
+      renderStoreCards(filtered);
+      renderCharts(filtered);
+      renderTable(filtered);
+      document.getElementById('filteredCountText').textContent = 'Exibindo ' + filtered.length + ' de ' + rawData.length + ' registros';
+    }
+
+    function renderOverviewCard(items) {
+      const totalCompras = items.reduce((acc, i) => acc + i.qtdCompra, 0);
+      const totalItens = items.reduce((acc, i) => acc + i.totalItens, 0);
+      const totalExcluidos = items.reduce((acc, i) => acc + i.itensExcluidos, 0);
+      const taxaGeral = totalItens > 0 ? ((totalExcluidos / totalItens) * 100).toFixed(2) : '0,00';
+
+      document.getElementById('metricQtdCompra').textContent = formatNumber(totalCompras);
+      document.getElementById('metricTotalItens').textContent = formatNumber(totalItens);
+      document.getElementById('metricItensExcluidos').textContent = formatNumber(totalExcluidos);
+      document.getElementById('metricTaxaExclusao').textContent = taxaGeral.replace('.', ',') + '%';
+
+      const selLoja = document.getElementById('selectLoja').value;
+      document.getElementById('generalCardTitle').textContent = selLoja === 'TODAS' ? 'Visão Geral Consolidada' : 'Visão da Loja: ' + selLoja;
+
+      const badge = document.getElementById('generalExclusionBadge');
+      const numTaxa = parseFloat(taxaGeral);
+      if (numTaxa > 14) {
+        badge.className = 'px-4 py-2 rounded-xl text-center font-black bg-rose-50 border border-rose-300 text-rose-700';
+        badge.textContent = 'ATENÇÃO: Taxa Elevada de Ruptura';
+      } else if (numTaxa < 7) {
+        badge.className = 'px-4 py-2 rounded-xl text-center font-black bg-emerald-50 border border-emerald-300 text-emerald-700';
+        badge.textContent = 'ÓTIMO: Baixo Índice de Ruptura';
+      } else {
+        badge.className = 'px-4 py-2 rounded-xl text-center font-black bg-amber-50 border border-amber-300 text-amber-700';
+        badge.textContent = 'REGULAR: Índice Moderado';
+      }
+    }
+
+    function renderStoreCards(items) {
+      const grid = document.getElementById('storesGrid');
+      grid.innerHTML = '';
+
+      const storeMap = {};
+      items.forEach(item => {
+        if (!storeMap[item.loja]) {
+          storeMap[item.loja] = { loja: item.loja, totalCompras: 0, totalItens: 0, totalExcluidos: 0, dias: 0 };
         }
+        storeMap[item.loja].totalCompras += item.qtdCompra;
+        storeMap[item.loja].totalItens += item.totalItens;
+        storeMap[item.loja].totalExcluidos += item.itensExcluidos;
+        storeMap[item.loja].dias += 1;
+      });
 
-        if (autoClose) {
-          returnUrl.searchParams.set('__auto_close', '1');
-          const url = new URL(window.location.href);
-          url.searchParams.set('return_url', returnUrl.toString());
-          // Land on the cookie check page first, so the user can interact with it before proceeding
-          // to the return url where cookies can be set.
-          window.open(url.toString(), '_blank');
-          const hasAccess = await document.hasStorageAccess();
-          document.querySelector('#stepOne').classList.add('hidden');
-          if (!hasAccess) {
-            document.querySelector('#stepThree').classList.remove('hidden');
-          } else {
-            window.location.reload();
+      const stores = Object.values(storeMap).map(s => ({
+        ...s,
+        pct: s.totalItens > 0 ? (s.totalExcluidos / s.totalItens) * 100 : 0
+      }));
+
+      const sortBy = document.getElementById('sortStoresSelect').value;
+      stores.sort((a, b) => {
+        if (sortBy === 'pct_desc') return b.pct - a.pct;
+        if (sortBy === 'pct_asc') return a.pct - b.pct;
+        if (sortBy === 'compras_desc') return b.totalCompras - a.totalCompras;
+        return b.totalItens - a.totalItens;
+      });
+
+      const isDark = cardTheme === 'clean_dark';
+      const selectedLoja = document.getElementById('selectLoja').value;
+
+      stores.forEach(s => {
+        const isSelected = selectedLoja === s.loja;
+        const isHigh = s.pct > 14;
+        const isLow = s.pct < 7 && s.totalItens > 0;
+
+        const card = document.createElement('div');
+        card.className = 'rounded-xl p-4 cursor-pointer transition-all border ' + (
+          isSelected
+            ? isDark
+              ? 'bg-slate-800 border-2 border-blue-400 shadow-lg ring-2 ring-blue-500/30'
+              : 'bg-blue-50/80 border-2 border-blue-600 shadow-md ring-2 ring-blue-500/20'
+            : isDark
+            ? 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-800/90 shadow-md'
+            : 'bg-slate-50/60 border-slate-300 hover:border-blue-400 hover:bg-white hover:shadow-md'
+        );
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2 mb-3">
+            <div>
+              <h4 class="text-sm font-black ${isDark ? 'text-white' : 'text-slate-900'} truncate">${s.loja}</h4>
+              <span class="text-[11px] font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}">${s.dias} dias com movimento</span>
+            </div>
+            <span class="text-xs font-black px-2 py-0.5 rounded-full border ${
+              isLow
+                ? isDark ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60' : 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                : isHigh
+                ? isDark ? 'bg-rose-950/80 text-rose-300 border-rose-700/60' : 'bg-rose-50 text-rose-700 border-rose-300'
+                : isDark ? 'bg-amber-950/80 text-amber-300 border-amber-700/60' : 'bg-amber-50 text-amber-700 border-amber-300'
+            }">
+              ${s.pct.toFixed(2).replace('.', ',')}%
+            </span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 py-2 px-2.5 rounded-lg border text-center ${isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-200'}">
+            <div>
+              <span class="block text-[10px] font-semibold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}">Compras</span>
+              <strong class="text-xs font-black ${isDark ? 'text-slate-100' : 'text-slate-800'}">${formatNumber(s.totalCompras)}</strong>
+            </div>
+            <div>
+              <span class="block text-[10px] font-semibold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}">Itens</span>
+              <strong class="text-xs font-black ${isDark ? 'text-slate-100' : 'text-slate-800'}">${formatNumber(s.totalItens)}</strong>
+            </div>
+            <div>
+              <span class="block text-[10px] font-semibold uppercase ${isDark ? 'text-slate-400' : 'text-slate-500'}">Excluídos</span>
+              <strong class="text-xs font-black text-rose-500">${formatNumber(s.totalExcluidos)}</strong>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="flex items-center justify-between text-[10px] font-medium mb-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}">
+              <span>Taxa de Exclusão</span>
+              <span class="font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}">${s.pct.toFixed(2).replace('.', ',')}%</span>
+            </div>
+            <div class="w-full rounded-full h-1.5 overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-200'}">
+              <div class="h-full rounded-full ${isLow ? 'bg-emerald-500' : isHigh ? 'bg-rose-500' : 'bg-amber-500'}" style="width: ${Math.min(100, s.pct)}%"></div>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => {
+          document.getElementById('selectLoja').value = (selectedLoja === s.loja) ? 'TODAS' : s.loja;
+          renderAll();
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderCharts(items) {
+      if (!window.Chart) return;
+
+      const dailyMap = {};
+      items.forEach(d => {
+        if (!dailyMap[d.data]) dailyMap[d.data] = { data: d.data, iso: d.isoDate, itens: 0, excluidos: 0 };
+        dailyMap[d.data].itens += d.totalItens;
+        dailyMap[d.data].excluidos += d.itensExcluidos;
+      });
+
+      const dailyList = Object.values(dailyMap).sort((a, b) => (a.iso || '').localeCompare(b.iso || ''));
+      const labels = dailyList.map(d => d.data.slice(0, 5));
+      const values = dailyList.map(d => d.itens > 0 ? Number(((d.excluidos / d.itens) * 100).toFixed(2)) : 0);
+
+      const ctxEvolution = document.getElementById('chartEvolution').getContext('2d');
+      if (chartEvolutionInstance) chartEvolutionInstance.destroy();
+
+      chartEvolutionInstance = new Chart(ctxEvolution, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Taxa de Exclusão (%)',
+            data: values,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: (v) => v + '%' }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+            x: { grid: { display: false } }
           }
-        } else {
-          window.location.href = returnUrl.toString();
         }
-      }
+      });
 
-      /**
-       * Grants the browser permission to set cookies. If successful, then it redirects to the
-       * return url.
-       */
-      async function grantStorageAccess() {
-        try {
-          await document.requestStorageAccess();
-          // Recent Safari/iOS versions block document.cookie entirely in
-          // cross-site iframes, even after requestStorageAccess(). Only
-          // server-side Set-Cookie headers work. Signal to the Lua auth script
-          // via query param so it can set the test cookie server-side.
-          redirectToReturnUrl(false, /* storageAccessGranted= */ true);
-        } catch (err) {
-          console.log('error after button click: ', err);
-        }
-      }
+      const storeMap = {};
+      items.forEach(d => {
+        if (!storeMap[d.loja]) storeMap[d.loja] = { loja: d.loja, itens: 0, excluidos: 0 };
+        storeMap[d.loja].itens += d.totalItens;
+        storeMap[d.loja].excluidos += d.itensExcluidos;
+      });
 
-      /**
-       * Verifies that the browser can set cookies. If it can, then it redirects to the return url.
-       * If it can't, then it shows the error UI.
-       */
-      function verifyCanSetCookies() {
-        setAuthFlowTestCookie();
-        if (authFlowTestCookieIsSet()) {
-          // Check if we are on the auto-close flow, and if so show the interact button.
-          const returnUrl = new URLSearchParams(window.location.search).get('return_url');
-          const autoClose = new URL(returnUrl).searchParams.has('__auto_close');
-          if (autoClose) {
-            document.querySelector('#stepOne').classList.add('hidden');
-            document.querySelector('#stepTwo').classList.remove('hidden');
-          } else {
-            redirectToReturnUrl(false);
-            return;
+      const storeList = Object.values(storeMap)
+        .map(s => ({ loja: s.loja, pct: s.itens > 0 ? Number(((s.excluidos / s.itens) * 100).toFixed(2)) : 0 }))
+        .sort((a, b) => b.pct - a.pct)
+        .slice(0, 10);
+
+      const ctxStores = document.getElementById('chartStores').getContext('2d');
+      if (chartStoresInstance) chartStoresInstance.destroy();
+
+      chartStoresInstance = new Chart(ctxStores, {
+        type: 'bar',
+        data: {
+          labels: storeList.map(s => s.loja),
+          datasets: [{
+            label: 'Taxa (%)',
+            data: storeList.map(s => s.pct),
+            backgroundColor: storeList.map(s => s.pct > 14 ? '#f43f5e' : s.pct < 7 ? '#10b981' : '#f59e0b'),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: (v) => v + '%' }, grid: { color: 'rgba(0, 0, 0, 0.05)' } },
+            x: { ticks: { font: { size: 9 }, maxRotation: 45, minRotation: 20 }, grid: { display: false } }
           }
         }
-        // The cookie could not be set, so initiate the recovery flow.
-        document.querySelector('.logo').classList.add('hidden');
-        document.querySelector('.spinner').classList.add('hidden');
-        document.querySelector('#error-ui').classList.remove('hidden');
+      });
+    }
+
+    function renderTable(items) {
+      const tbody = document.getElementById('tableBody');
+      const tfoot = document.getElementById('tableFoot');
+      tbody.innerHTML = '';
+
+      const start = (currentPage - 1) * pageSize;
+      const paginated = items.slice(start, start + pageSize);
+
+      if (paginated.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum registro encontrado.</td></tr>';
+      } else {
+        paginated.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-blue-50/40 transition-colors';
+          const isHigh = row.itensExcluidosPct > 14;
+          const isLow = row.itensExcluidosPct < 7 && row.totalItens > 0;
+
+          tr.innerHTML = `
+            <td class="py-2.5 px-4 font-mono text-slate-600">${row.data}</td>
+            <td class="py-2.5 px-4 font-bold text-slate-900">${row.loja}</td>
+            <td class="py-2.5 px-4 text-right font-medium text-slate-700">${formatNumber(row.qtdCompra)}</td>
+            <td class="py-2.5 px-4 text-right font-bold text-slate-900">${formatNumber(row.totalItens)}</td>
+            <td class="py-2.5 px-4 text-right font-bold text-rose-600">${formatNumber(row.itensExcluidos)}</td>
+            <td class="py-2.5 px-4 text-right">
+              <span class="inline-flex px-2 py-0.5 rounded-md font-mono font-bold text-[11px] ${
+                isLow ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                isHigh ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                'bg-amber-50 text-amber-700 border border-amber-200'
+              }">${row.itensExcluidosPct.toFixed(2).replace('.', ',')}%</span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
 
-      // Start the cookie verification process.
-      verifyCanSetCookies();
-    </script>
-  </body>
+      const compras = items.reduce((acc, i) => acc + i.qtdCompra, 0);
+      const totalItens = items.reduce((acc, i) => acc + i.totalItens, 0);
+      const excluidos = items.reduce((acc, i) => acc + i.itensExcluidos, 0);
+      const pct = totalItens > 0 ? ((excluidos / totalItens) * 100).toFixed(2) : '0,00';
+
+      tfoot.innerHTML = `
+        <tr>
+          <td colspan="2" class="py-3 px-4 uppercase text-xs">Total do Período / Filtro</td>
+          <td class="py-3 px-4 text-right text-xs">${formatNumber(compras)}</td>
+          <td class="py-3 px-4 text-right text-xs">${formatNumber(totalItens)}</td>
+          <td class="py-3 px-4 text-right text-xs text-rose-600">${formatNumber(excluidos)}</td>
+          <td class="py-3 px-4 text-right text-xs font-mono font-black">${pct.replace('.', ',')}%</td>
+        </tr>
+      `;
+
+      const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+      const pagDiv = document.getElementById('paginationBar');
+      pagDiv.innerHTML = `
+        <div>Linhas ${start + 1} a ${Math.min(start + pageSize, items.length)} de ${items.length}</div>
+        <div class="flex items-center gap-2">
+          <button id="prevPageBtn" ${currentPage === 1 ? 'disabled' : ''} class="px-2.5 py-1 rounded border border-slate-200 bg-white disabled:opacity-40">Anterior</button>
+          <span>Pág. ${currentPage} de ${totalPages}</span>
+          <button id="nextPageBtn" ${currentPage === totalPages ? 'disabled' : ''} class="px-2.5 py-1 rounded border border-slate-200 bg-white disabled:opacity-40">Próxima</button>
+        </div>
+      `;
+
+      document.getElementById('prevPageBtn')?.addEventListener('click', () => {
+        if (currentPage > 1) { currentPage--; renderTable(items); }
+      });
+      document.getElementById('nextPageBtn')?.addEventListener('click', () => {
+        if (currentPage < totalPages) { currentPage++; renderTable(items); }
+      });
+    }
+
+    function exportToCsv() {
+      const items = getFilteredData();
+      const headers = ['DATA', 'LOJA', 'QTD COMPRA', 'TOTAL DE ITENS', 'ITENS EXCLUIDOS', 'ITENS EXCLUIDOS %'];
+      const rows = items.map(d => [
+        d.data,
+        '"' + d.loja.replace(/"/g, '""') + '"',
+        d.qtdCompra,
+        d.totalItens,
+        d.itensExcluidos,
+        d.itensExcluidosPct.toFixed(2)
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'painel_rupturas_' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function attachEvents() {
+      document.getElementById('selectLoja').addEventListener('change', () => { currentPage = 1; renderAll(); });
+      document.getElementById('inputDataInicio').addEventListener('change', () => { currentPage = 1; renderAll(); });
+      document.getElementById('inputDataFim').addEventListener('change', () => { currentPage = 1; renderAll(); });
+      document.getElementById('inputBusca').addEventListener('input', () => { currentPage = 1; renderAll(); });
+      document.getElementById('sortStoresSelect').addEventListener('change', () => { renderStoreCards(getFilteredData()); });
+
+      document.getElementById('btnClearFilters').addEventListener('click', () => {
+        document.getElementById('selectLoja').value = 'TODAS';
+        document.getElementById('inputDataInicio').value = '';
+        document.getElementById('inputDataFim').value = '';
+        document.getElementById('inputBusca').value = '';
+        currentPage = 1;
+        renderAll();
+      });
+
+      const themeLightBtn = document.getElementById('themeLightBtn');
+      const themeDarkBtn = document.getElementById('themeDarkBtn');
+
+      themeLightBtn.addEventListener('click', () => {
+        cardTheme = 'refined_slate';
+        themeLightBtn.className = 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold transition-all';
+        themeDarkBtn.className = 'px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 font-semibold transition-all';
+        renderStoreCards(getFilteredData());
+      });
+
+      themeDarkBtn.addEventListener('click', () => {
+        cardTheme = 'clean_dark';
+        themeDarkBtn.className = 'px-2.5 py-1 rounded-md bg-slate-900 text-white shadow-xs font-bold transition-all';
+        themeLightBtn.className = 'px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 font-semibold transition-all';
+        renderStoreCards(getFilteredData());
+      });
+
+      document.getElementById('btnExportTop').addEventListener('click', exportToCsv);
+      document.getElementById('btnExportBottom').addEventListener('click', exportToCsv);
+      document.getElementById('btnOpenSync').addEventListener('click', () => tryAutoSyncFromDrive(false));
+
+      document.getElementById('fileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const parsed = parseCSV(event.target.result);
+          if (parsed.length > 0) {
+            rawData = parsed;
+            try { localStorage.setItem('painel_rupturas_data', JSON.stringify(parsed)); } catch (e) {}
+            document.getElementById('syncBadge').textContent = '● Arquivo Carregado';
+            setupStoresDropdown();
+            setupDateRange();
+            renderAll();
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
 </html>
