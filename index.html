@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Painel de Rupturas</title>
-  <meta name="description" content="Painel analítico de rupturas, compras, itens e exclusões por loja e data, com sincronização Google Drive e exportação de planilhas.">
+  <meta name="description" content="Painel analítico de rupturas, compras, itens e exclusões por loja e data, sincronizado com o Google Drive.">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,7 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </style>
 </head>
-<body class="bg-slate-50/90 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
   <!-- Cabeçalho -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
@@ -25,25 +25,25 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Painel de Rupturas</h1>
-            <span id="syncBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-              ● Base Ativa
+            <span id="syncBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              ● Google Drive Conectado
             </span>
           </div>
-          <p id="lastSyncText" class="text-xs text-slate-500 font-medium">Sincronização Google Drive & Análise Operacional</p>
+          <p id="lastSyncText" class="text-xs text-slate-500 font-medium">Sincronizado com Google Drive & Análise Operacional</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2.5 flex-wrap">
-        <button id="btnOpenSync" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-xs">
-          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
-          <span>Sincronizar Google Drive</span>
-        </button>
+        <!-- Link Direto para a Planilha no Google Drive -->
+        <a id="linkDriveSheet" href="https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors shadow-xs">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          <span>Abrir Planilha no Drive</span>
+        </a>
 
-        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer transition-colors shadow-xs">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <span>Subir CSV</span>
-          <input type="file" id="fileInput" accept=".csv,.txt" class="hidden">
-        </label>
+        <button id="btnOpenSync" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 transition-colors shadow-xs">
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>Atualizar do Drive</span>
+        </button>
 
         <button id="btnExportTop" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-extrabold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-xs">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -60,126 +60,76 @@
     <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1.5">Selecionar por Loja</label>
-          <select id="selectLoja" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500">
+          <label class="block text-xs font-bold text-slate-600 mb-1.5">Selecionar Loja</label>
+          <select id="selectLoja" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
             <option value="TODAS">TODAS AS LOJAS (CONSOLIDADO)</option>
           </select>
         </div>
-
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1.5">Data Início</label>
           <input type="date" id="inputDataInicio" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
         </div>
-
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1.5">Data Fim</label>
           <input type="date" id="inputDataFim" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
         </div>
-
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1.5">Buscar</label>
-          <div class="relative">
-            <input type="text" id="inputBusca" placeholder="Filtrar por loja ou número..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-8 pr-3 py-2 text-xs font-semibold text-slate-800">
-            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          </div>
+          <input type="text" id="inputBusca" placeholder="Filtrar loja..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
         </div>
-      </div>
-
-      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
-        <span id="filteredCountText" class="text-slate-500 font-medium">Carregando dados...</span>
-        <button id="btnClearFilters" class="text-blue-600 font-bold hover:underline">Limpar Filtros</button>
       </div>
     </div>
 
-    <!-- Card Geral de Destaque -->
-    <div class="bg-white rounded-2xl border-2 border-blue-600/30 p-6 shadow-sm relative overflow-hidden">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+    <!-- Card Geral -->
+    <div class="bg-white rounded-2xl border-2 border-blue-600/30 p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded-md bg-blue-600 text-white font-black text-xs uppercase tracking-wider">Card Geral</span>
-            <h2 id="generalCardTitle" class="text-lg font-black text-slate-900">Visão Geral Consolidada</h2>
-          </div>
-          <p id="generalCardSubtitle" class="text-xs text-slate-500 mt-1">Consolidado das operações de compras e índice de rupturas</p>
+          <span class="px-2 py-0.5 rounded-md bg-blue-600 text-white font-black text-xs uppercase">Card Geral</span>
+          <h2 id="generalCardTitle" class="text-lg font-black text-slate-900 mt-1">Visão Geral Consolidada</h2>
         </div>
-        <div id="generalExclusionBadge" class="self-start md:self-auto px-4 py-2 rounded-xl text-center font-black">
-        </div>
+        <div id="generalExclusionBadge" class="px-3 py-1.5 rounded-xl font-black text-xs"></div>
       </div>
 
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Qtd Compra</span>
+          <span class="text-[11px] font-bold text-slate-500 uppercase">Qtd Compra</span>
           <span id="metricQtdCompra" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
-          <span class="text-[10px] text-slate-400 mt-0.5 block">Transações registradas</span>
         </div>
-
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total de Itens</span>
+          <span class="text-[11px] font-bold text-slate-500 uppercase">Total de Itens</span>
           <span id="metricTotalItens" class="text-2xl font-black text-slate-900 mt-1 block">0</span>
-          <span class="text-[10px] text-slate-400 mt-0.5 block">Volume processado</span>
         </div>
-
-        <div class="p-4 rounded-xl bg-rose-50/50 border border-rose-200">
-          <span class="text-[11px] font-bold text-rose-700 uppercase tracking-wider block">Itens Excluídos</span>
+        <div class="p-4 rounded-xl bg-rose-50 border border-rose-200">
+          <span class="text-[11px] font-bold text-rose-700 uppercase">Itens Excluídos</span>
           <span id="metricItensExcluidos" class="text-2xl font-black text-rose-600 mt-1 block">0</span>
-          <span class="text-[10px] text-rose-500 mt-0.5 block">Ruptura / descarte</span>
         </div>
-
-        <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200">
-          <span class="text-[11px] font-bold text-blue-800 uppercase tracking-wider block">Taxa de Exclusão %</span>
+        <div class="p-4 rounded-xl bg-blue-50 border border-blue-200">
+          <span class="text-[11px] font-bold text-blue-800 uppercase">Taxa de Exclusão %</span>
           <span id="metricTaxaExclusao" class="text-2xl font-black text-blue-700 mt-1 block">0,00%</span>
-          <span class="text-[10px] text-blue-600 mt-0.5 block">Proporção descartada</span>
         </div>
       </div>
     </div>
 
-    <!-- Destaque por Loja (Cards com Bordas e Opção Escuro) -->
-    <div class="space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h3 class="text-base font-extrabold text-slate-900">Destaque por Loja</h3>
-          <p class="text-xs text-slate-500">Clique em qualquer loja para filtrar a análise</p>
-        </div>
-
-        <!-- Seletor de Tema dos Cards de Loja -->
-        <div class="flex items-center gap-3">
-          <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs font-semibold">
-            <button id="themeLightBtn" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold transition-all">
-              Suave / Borda Fina
-            </button>
-            <button id="themeDarkBtn" class="px-2.5 py-1 rounded-md text-slate-500 hover:text-slate-800 font-semibold transition-all">
-              Mais Escuro
-            </button>
-          </div>
-
-          <select id="sortStoresSelect" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-700">
-            <option value="itens_desc">Volume Itens (Maior)</option>
-            <option value="pct_desc">Taxa Exclusão % (Maior)</option>
-            <option value="pct_asc">Taxa Exclusão % (Menor)</option>
-            <option value="compras_desc">Qtd Compra (Maior)</option>
-          </select>
+    <!-- Destaque por Loja -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-base font-extrabold text-slate-900">Destaque por Loja</h3>
+        <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+          <button id="themeLightBtn" class="px-2.5 py-1 rounded bg-white text-slate-900 font-bold shadow-xs">Suave / Borda Fina</button>
+          <button id="themeDarkBtn" class="px-2.5 py-1 rounded text-slate-600 font-semibold">Mais Escuro</button>
         </div>
       </div>
-
-      <!-- Grade de Cards de Loja -->
       <div id="storesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </div>
 
-    <!-- Tabela Detalhada -->
+    <!-- Tabela -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-      <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h3 class="text-sm font-bold text-slate-900">Detalhamento dos Dados</h3>
-          <p class="text-xs text-slate-500">Histórico completo de compras e exclusões</p>
-        </div>
-        <button id="btnExportBottom" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          Exportar Planilha Excel/CSV
-        </button>
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900">Detalhamento dos Dados</h3>
       </div>
-
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-slate-700">
-          <thead class="bg-slate-50/80 border-b border-slate-200 font-bold uppercase tracking-wider text-[11px] text-slate-500">
+          <thead class="bg-slate-50 border-b border-slate-200 font-bold uppercase text-[11px] text-slate-500">
             <tr>
               <th class="py-3 px-4">Data</th>
               <th class="py-3 px-4">Loja</th>
@@ -190,37 +140,16 @@
             </tr>
           </thead>
           <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
-          <tfoot id="tableFoot" class="bg-slate-50 border-t-2 border-slate-200 font-bold text-slate-800"></tfoot>
+          <tfoot id="tableFoot" class="bg-slate-50 border-t-2 border-slate-200 font-bold"></tfoot>
         </table>
       </div>
-
-      <div id="paginationBar" class="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-600"></div>
     </div>
+
   </main>
 
-  <!-- Modal Google Drive -->
-  <div id="syncModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-        <h3 class="text-sm font-bold text-slate-900">Sincronização Google Drive</h3>
-        <button id="btnCloseModal" class="p-1 text-slate-400 hover:text-slate-700">✕</button>
-      </div>
-      <div class="mt-4 space-y-3 text-xs">
-        <label class="block font-bold text-slate-700">Link do Google Drive ou Sheets</label>
-        <input type="url" id="inputDriveUrl" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-mono">
-      </div>
-      <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-        <button id="btnResetData" class="text-slate-500 hover:text-rose-600 font-bold text-xs">Restaurar Padrão</button>
-        <div class="flex gap-2">
-          <button id="btnCancelModal" class="px-3 py-1.5 rounded-lg border border-slate-300 text-xs">Cancelar</button>
-          <button id="btnConfirmSync" class="px-4 py-1.5 rounded-lg bg-blue-600 text-white font-bold text-xs">Sincronizar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-    <p>Painel de Rupturas • Sincronização Google Drive & Análise Operacional</p>
+    <p>Painel de Rupturas • Conectado ao Google Drive</p>
   </footer>
+
 </body>
 </html>
